@@ -46,7 +46,7 @@ values."
      (shell :variables
             shell-default-height 30
             shell-default-position 'bottom)
-     spell-checking
+     (spell-checking :variables spell-checking-enable-by-default nil)
      (syntax-checking :variables
                       syntax-checking-enable-tooltips nil)
      version-control
@@ -319,6 +319,8 @@ you should place your code here."
    web-mode-css-indent-offset 2
    web-mode-code-indent-offset 2
    web-mode-attr-indent-offset 2)
+  (dolist (hook '(text-mode-hook))
+    (add-hook hook (lambda () (flyspell-mode 1))))
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
