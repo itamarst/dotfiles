@@ -321,6 +321,7 @@ you should place your code here."
    web-mode-attr-indent-offset 2)
   (dolist (hook '(text-mode-hook))
     (add-hook hook (lambda () (flyspell-mode 1))))
+  (spacemacs/toggle-smartparens-globally-off)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
