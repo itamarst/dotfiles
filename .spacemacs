@@ -321,6 +321,7 @@ you should place your code here."
    web-mode-attr-indent-offset 2)
   (dolist (hook '(text-mode-hook))
     (add-hook hook (lambda () (flyspell-mode 1))))
+  (remove-hook 'prog-mode-hook #'smartparens-mode)
   (spacemacs/toggle-smartparens-globally-off)
   )
 
