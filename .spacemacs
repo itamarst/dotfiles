@@ -65,7 +65,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '()
+   dotspacemacs-additional-packages '(elpy)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -310,6 +310,7 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
+  ; 2-space indentation in react files:
   (setq-default
    ;; js2-mode
    js2-basic-offset 2
@@ -319,9 +320,12 @@ you should place your code here."
    web-mode-css-indent-offset 2
    web-mode-code-indent-offset 2
    web-mode-attr-indent-offset 2)
+  ; Enable spell-checking in text modes:
   (dolist (hook '(text-mode-hook))
     (add-hook hook (lambda () (flyspell-mode 1))))
+  ; Disable smartparens
   (remove-hook 'prog-mode-hook #'smartparens-mode)
+  (remove-hook 'text-mode-hook #'smartparens-mode)
   (spacemacs/toggle-smartparens-globally-off)
   )
 
