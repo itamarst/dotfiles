@@ -66,7 +66,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(polymode)
+   dotspacemacs-additional-packages '(mmm-mode)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -324,9 +324,25 @@ you should place your code here."
   ; Enable spell-checking in text modes:
   (dolist (hook '(text-mode-hook))
     (add-hook hook (lambda () (flyspell-mode 1))))
-  ; Configure polymode:
-  (require 'poly-markdown)
-  (add-to-list 'auto-mode-alist '("\\.md" . poly-markdown-mode))
+  ; Configure mmm-mode:
+  (require 'mmm-mode)
+  (setq mmm-global-mode 'maybe)
+  (defun my-mmm-markdown-auto-class (lang &optional submode)
+    "Define a mmm-mode class for LANG in `markdown-mode' using SUBMODE.
+If SUBMODE is not provided, use `LANG-mode' by default."
+    (let ((class (intern (concat "markdown-" lang)))
+          (submode (or submode (intern (concat lang "-mode"))))
+          (front (concat "^```" lang "[\n\r]+"))
+          (back "^```"))
+      (mmm-add-classes (list (list class :submode submode :front front :back back)))
+      (mmm-add-mode-ext-class 'markdown-mode nil class)))
+
+  ;; Mode names that derive directly from the language name
+  (mapc 'my-mmm-markdown-auto-class
+        '("awk" "bibtex" "c" "cpp" "css" "html" "latex" "lisp" "makefile"
+          "markdown" "python" "r" "ruby" "sql" "stata" "xml" "yaml"))
+  (my-mmm-markdown-auto-class "shell" 'shell-script-mode)
+  (setq mmm-parse-when-idle 't)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
