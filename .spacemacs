@@ -343,6 +343,7 @@ If SUBMODE is not provided, use `LANG-mode' by default."
           "markdown" "python" "r" "ruby" "sql" "stata" "xml" "yaml"))
   (my-mmm-markdown-auto-class "shell" 'shell-script-mode)
   (setq mmm-parse-when-idle 't)
+  (add-hook 'prog-mode-hook rainbow-delimiters-mode)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
