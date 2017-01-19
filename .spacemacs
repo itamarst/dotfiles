@@ -344,6 +344,8 @@ If SUBMODE is not provided, use `LANG-mode' by default."
   (my-mmm-markdown-auto-class "shell" 'shell-script-mode)
   (setq mmm-parse-when-idle 't)
   (add-hook 'prog-mode-hook rainbow-delimiters-mode)
+  ;; After switching projects in projectile by default we want magit-status
+  (setq projectile-switch-project-action 'magit-status)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
