@@ -50,7 +50,7 @@ values."
      (syntax-checking :variables
                       syntax-checking-enable-tooltips nil)
      version-control
-     python
+     (python :variables python-enable-yapf-format-on-save t)
      javascript
      yaml
      react
