@@ -346,6 +346,9 @@ If SUBMODE is not provided, use `LANG-mode' by default."
   (add-hook 'prog-mode-hook rainbow-delimiters-mode)
   ;; After switching projects in projectile by default we want magit-status
   (setq projectile-switch-project-action 'magit-status)
+  ;; Highlight indentation:
+  (add-hook 'prog-mode-hook 'highlight-indentation-mode)
+  (add-hook 'yaml-mode-hook 'highlight-indentation-mode)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
