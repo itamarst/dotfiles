@@ -348,10 +348,9 @@ If SUBMODE is not provided, use `LANG-mode' by default."
   (setq projectile-switch-project-action 'magit-status)
   ;; Highlight indentation:
   (add-hook 'prog-mode-hook 'highlight-indentation-mode)
-  (add-hook 'yaml-mode-hook '(lambda ()
-                               (highlight-indentation-mode)
-                               (highlight-indentation-set-offset 2))
-                               )
+  (add-hook 'yaml-mode-hook (lambda ()
+                              (highlight-indentation-mode)
+                              (highlight-indentation-set-offset 2)))
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
