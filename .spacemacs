@@ -66,7 +66,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(mmm-mode)
+   dotspacemacs-additional-packages '(polymode)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -324,26 +324,10 @@ you should place your code here."
   ; Enable spell-checking in text modes:
   (dolist (hook '(text-mode-hook))
     (add-hook hook (lambda () (flyspell-mode 1))))
-  ; Configure mmm-mode:
-  (require 'mmm-mode)
-  (setq mmm-global-mode 'maybe)
-  (defun my-mmm-markdown-auto-class (lang &optional submode)
-    "Define a mmm-mode class for LANG in `markdown-mode' using SUBMODE.
-If SUBMODE is not provided, use `LANG-mode' by default."
-    (let ((class (intern (concat "markdown-" lang)))
-          (submode (or submode (intern (concat lang "-mode"))))
-          (front (concat "^```" lang "[\n\r]+"))
-          (back "^```"))
-      (mmm-add-classes (list (list class :submode submode :front front :back back)))
-      (mmm-add-mode-ext-class 'markdown-mode nil class)))
-
-  ;; Mode names that derive directly from the language name
-  (mapc 'my-mmm-markdown-auto-class
-        '("awk" "bibtex" "c" "cpp" "css" "html" "latex" "lisp" "makefile"
-          "markdown" "python" "r" "ruby" "sql" "stata" "xml" "yaml"))
-  (my-mmm-markdown-auto-class "shell" 'shell-script-mode)
-  (setq mmm-parse-when-idle 't)
-  (add-hook 'prog-mode-hook rainbow-delimiters-mode)
+  ; Configure poly-mode:
+  (require 'poly-markdown)
+  (add-to-list 'auto-mode-alist '("\\.md" . poly-markdown-mode))
+  (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
   ;; After switching projects in projectile by default we want magit-status
   (setq projectile-switch-project-action 'magit-status)
   ;; Highlight indentation:
@@ -355,3 +339,17 @@ If SUBMODE is not provided, use `LANG-mode' by default."
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (polymode yapfify yaml-mode xterm-color ws-butler window-numbering which-key wgrep web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toc-org tagedit stickyfunc-enhance srefactor spacemacs-theme spaceline smex smeargle slim-mode shell-pop scss-mode sass-mode restart-emacs request rainbow-delimiters quelpa pyvenv pytest pyenv-mode py-isort pug-mode popwin pip-requirements persp-mode pcre2el paradox orgit org-projectile org-present org-pomodoro org-plus-contrib org-download org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode linum-relative link-hint less-css-mode json-mode js2-refactor js-doc ivy-hydra insert-shebang info+ indent-guide imenu-list ido-vertical-mode hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-make google-translate golden-ratio go-guru go-eldoc gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md flyspell-correct-ivy flycheck-pos-tip flx-ido fish-mode fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode elisp-slime-nav dumb-jump disaster diff-hl define-word cython-mode counsel-projectile company-web company-tern company-statistics company-shell company-go company-c-headers company-anaconda column-enforce-mode coffee-mode cmake-mode clean-aindent-mode clang-format auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ac-ispell))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
