@@ -66,7 +66,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(polymode)
+   dotspacemacs-additional-packages '(mmm-mode)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -324,9 +324,15 @@ you should place your code here."
   ; Enable spell-checking in text modes:
   (dolist (hook '(text-mode-hook))
     (add-hook hook (lambda () (flyspell-mode 1))))
-  ; Configure poly-mode:
-  (require 'poly-markdown)
-  (add-to-list 'auto-mode-alist '("\\.md" . poly-markdown-mode))
+  ; mmm-mode for markdown
+  (markdown/init-mmm-mode)
+  (mmm-add-classes '((markdown-yaml
+                      :submode yaml-mode
+                      :face mmm-declaration-submode-face
+                      :front "^```yaml[\n\r]+"
+                      :back "^```$")))
+  (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-yaml)
+  (setq mmm-parse-when-idle 't)
   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
   ;; After switching projects in projectile by default we want magit-status
   (setq projectile-switch-project-action 'magit-status)
