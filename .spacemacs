@@ -326,6 +326,7 @@ you should place your code here."
     (add-hook hook (lambda () (flyspell-mode 1))))
   ; mmm-mode for markdown
   (markdown/init-mmm-mode)
+  (setq mmm-global-mode 'maybe)
   (mmm-add-classes '((markdown-yaml
                       :submode yaml-mode
                       :face mmm-declaration-submode-face
