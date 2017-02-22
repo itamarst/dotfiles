@@ -343,6 +343,8 @@ you should place your code here."
   (add-hook 'yaml-mode-hook (lambda ()
                               (highlight-indentation-mode)
                               (highlight-indentation-set-offset 2)))
+                                        ; Visual line mode for text:
+  (add-hook 'text-mode-hook 'visual-line-mode)
   ; Python options:
   (setq python-fill-docstring-style (quote symmetric))
   )
