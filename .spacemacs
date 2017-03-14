@@ -318,6 +318,7 @@ you should place your code here."
   (setq-default
    ;; js2-mode
    js2-basic-offset 2
+
    ;; web-mode
    css-indent-offset 2
    web-mode-markup-indent-offset 2
@@ -337,7 +338,7 @@ you should place your code here."
                       :back "^```$")))
   (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-yaml)
   (setq mmm-parse-when-idle 't)
-  (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
+  (show-paren-mode 1)
   ;; After switching projects in projectile by default we want magit-status
   (setq projectile-switch-project-action 'magit-status)
   ;; Highlight indentation:
