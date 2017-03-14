@@ -69,7 +69,8 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(mmm-mode magithub switch-window ivy-rich)
+   dotspacemacs-additional-packages '(mmm-mode magithub switch-window ivy-rich
+                                               indent-tools)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -358,6 +359,7 @@ you should place your code here."
   (global-set-key (kbd "C-x o") 'switch-window)
   ; nicer buffer switching
   (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
+  (global-set-key (kbd "C-c .") 'indent-tools-hydra/body)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
