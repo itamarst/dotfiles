@@ -360,7 +360,7 @@ you should place your code here."
   ; nicer buffer switching
   (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
   (global-set-key (kbd "C-c .") 'indent-tools-hydra/body)
-  (global-set-key (kbd "C-c C-s") 'counsel-dash)
+  (global-set-key (kbd "C-c s") 'counsel-dash)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
