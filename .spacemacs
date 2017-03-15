@@ -339,6 +339,7 @@ you should place your code here."
                       :back "^```$")))
   (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-yaml)
   (setq mmm-parse-when-idle 't)
+  ; highlight matching parenthesis:
   (show-paren-mode 1)
   ;; After switching projects in projectile by default we want magit-status
   (setq projectile-switch-project-action 'magit-status)
@@ -359,7 +360,9 @@ you should place your code here."
   (global-set-key (kbd "C-x o") 'switch-window)
   ; nicer buffer switching
   (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
+  ; shift indent-based chunks (python, yaml)
   (global-set-key (kbd "C-c .") 'indent-tools-hydra/body)
+  ; Search documentation
   (global-set-key (kbd "C-c s") 'counsel-dash)
   )
 
