@@ -70,7 +70,7 @@ values."
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(mmm-mode magithub switch-window ivy-rich
-                                               indent-tools vdiff)
+                                               indent-tools vdiff helm-dash counsel-dash)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -360,6 +360,7 @@ you should place your code here."
   ; nicer buffer switching
   (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
   (global-set-key (kbd "C-c .") 'indent-tools-hydra/body)
+  (global-set-key (kbd "C-c C-s") 'counsel-dash)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
