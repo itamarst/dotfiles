@@ -329,6 +329,8 @@ you should place your code here."
   ; Enable spell-checking in text modes:
   (dolist (hook '(text-mode-hook))
     (add-hook hook (lambda () (flyspell-mode 1))))
+  (dolist (hook '(yaml-mode-hook))
+    (add-hook hook (lambda () (flyspell-mode -1))))
   ; mmm-mode for markdown
   (markdown/init-mmm-mode)
   (setq mmm-global-mode 'maybe)
