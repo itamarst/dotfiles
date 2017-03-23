@@ -70,7 +70,8 @@ values."
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(mmm-mode magithub switch-window ivy-rich
-                                               indent-tools vdiff helm-dash counsel-dash)
+                                      indent-tools vdiff helm-dash counsel-dash
+                                      flx company-flx outline-magic)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -366,6 +367,13 @@ you should place your code here."
   (global-set-key (kbd "C-c .") 'indent-tools-hydra/body)
   ; Search documentation
   (global-set-key (kbd "C-c s") 'counsel-dash)
+  ; better fuzzy matching
+  (with-eval-after-load 'company
+    (company-flx-mode +1))
+  ; outline cycling for outline-minor-mode
+  (add-hook 'prog-mode-hook 'outline-minor-mode)
+  (add-hook 'yaml-mode-hook 'outline-minor-mode)
+  (define-key outline-minor-mode-map (kbd "<C-tab>") 'outline-cycle)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
