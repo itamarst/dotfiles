@@ -380,11 +380,17 @@ you should place your code here."
   (defun pyvenv-autoload ()
     (defun load-if-exists (path)
       (if (file-exists-p path)
-          (pyvenv-activate path)))
+          (progn
+            (pyvenv-activate path)
+            (setq-local pyvenv-activate path))))
     (let* ((pdir (projectile-project-root)))
       (load-if-exists (concat pdir "/virtualenv"))
       (load-if-exists (concat pdir "/venv"))))
   (add-hook 'python-mode-hook 'pyvenv-autoload)
+  (defun pyvenv-switch ()
+    (if (eq major-mode 'python-mode)
+        (pyvenv-track-virtualenv)))
+  (add-hook 'window-configuration-change-hook 'pyvenv-switch)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
