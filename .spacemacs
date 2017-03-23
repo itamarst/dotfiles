@@ -327,7 +327,7 @@ you should place your code here."
    web-mode-css-indent-offset 2
    web-mode-code-indent-offset 2
    web-mode-attr-indent-offset 2)
-  ; Enable spell-checking in text modes:
+  ; Enable spell-checking in text modes (but not YAML):
   (dolist (hook '(text-mode-hook))
     (add-hook hook (lambda () (flyspell-mode 1))))
   (dolist (hook '(yaml-mode-hook))
