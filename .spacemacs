@@ -376,6 +376,15 @@ you should place your code here."
   (add-hook 'prog-mode-hook 'outline-minor-mode)
   (add-hook 'yaml-mode-hook 'outline-minor-mode)
   (define-key outline-minor-mode-map (kbd "<C-tab>") 'outline-cycle)
+  ; automatic virtualenv loading:
+  (defun pyvenv-autoload ()
+    (defun load-if-exists (path)
+      (if (file-exists-p path)
+          (pyvenv-activate path)))
+    (let* ((pdir (projectile-project-root)))
+      (load-if-exists (concat pdir "/virtualenv"))
+      (load-if-exists (concat pdir "/venv"))))
+  (add-hook 'python-mode-hook 'pyvenv-autoload)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
