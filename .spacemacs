@@ -364,6 +364,8 @@ you should place your code here."
   ; nicer buffer switching
   (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
   ; shift indent-based chunks (python, yaml)
+  (add-hook 'python-mode-hook 'indent-tools-minor-mode)
+  (add-hook 'yaml-mode-hook 'indent-tools-minor-mode)
   (global-set-key (kbd "C-c .") 'indent-tools-hydra/body)
   ; Search documentation
   (global-set-key (kbd "C-c s") 'counsel-dash)
