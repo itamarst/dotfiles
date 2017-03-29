@@ -391,6 +391,11 @@ you should place your code here."
     (if (eq major-mode 'python-mode)
         (pyvenv-track-virtualenv)))
   (add-hook 'window-configuration-change-hook 'pyvenv-switch)
+  ; character level diffs
+  (setq-default ediff-forward-word-function 'forward-char)
+  (setq-default magit-diff-refine-hunk 't)
+  ; keybinding for vc-ediff
+  (global-set-key (kbd "M-m g d") 'vc-ediff)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
