@@ -406,6 +406,11 @@ you should place your code here."
   (setq-default magit-diff-refine-hunk 't)
   ; keybinding for vc-ediff
   (global-set-key (kbd "M-m g d") 'vc-ediff)
+  ; I hate changelog mode
+  (delete '("[cC]hange\\.?[lL]og?\\'" . change-log-mode) auto-mode-alist)
+  (delete '("[cC]hange[lL]og[-.][0-9]+\\'" . change-log-mode) auto-mode-alist)
+  (delete '("\\$CHANGE_LOG\\$\\.TXT" . change-log-mode) auto-mode-alist)
+  (delete '("[cC]hange[lL]og[-.][-0-9a-z]+\\'" . change-log-mode) auto-mode-alist)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
