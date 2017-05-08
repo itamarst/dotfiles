@@ -71,7 +71,8 @@ values."
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(mmm-mode magithub switch-window ivy-rich
                                       indent-tools vdiff helm-dash counsel-dash
-                                      flx company-flx outline-magic)
+                                      flx company-flx outline-magic composable
+                                      white-theme)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -144,7 +145,8 @@ values."
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(spacemacs-dark
-                         spacemacs-light)
+                         white
+                         )
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
@@ -415,3 +417,9 @@ you should place your code here."
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(variable-pitch ((t (:weight normal :height 140 :family "Linux Libertine")))))
