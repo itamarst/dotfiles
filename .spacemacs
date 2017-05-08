@@ -72,7 +72,7 @@ values."
    dotspacemacs-additional-packages '(mmm-mode magithub switch-window ivy-rich
                                       indent-tools vdiff helm-dash counsel-dash
                                       flx company-flx outline-magic composable
-                                      white-theme)
+                                      white-theme remark-mode)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
