@@ -403,6 +403,11 @@ you should place your code here."
     (if (eq major-mode 'python-mode)
         (pyvenv-track-virtualenv)))
   (add-hook 'window-configuration-change-hook 'pyvenv-switch)
+  ; dash set for Python 3
+  (defun python-doc ()
+    (interactive)
+    (setq-local helm-dash-docsets '("Python 3")))
+  (add-hook 'python-mode-hook 'python-doc)
   ; character level diffs
   (setq-default ediff-forward-word-function 'forward-char)
   (setq-default magit-diff-refine-hunk 't)
