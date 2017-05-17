@@ -417,7 +417,7 @@ you should place your code here."
   ; keybinding for vc-ediff
   (global-set-key (kbd "M-m g d") 'vc-ediff)
   ; keybinding for jumping back
-  (global-set-key (kbd "M-m j DEL") 'global-pop-mark)
+  (global-set-key (kbd "M-m j DEL") 'pop-global-mark)
 
   ; I hate changelog mode
   (delete '("[cC]hange\\.?[lL]og?\\'" . change-log-mode) auto-mode-alist)
