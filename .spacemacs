@@ -69,10 +69,10 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(mmm-mode magithub switch-window ivy-rich
-                                      indent-tools vdiff helm-dash counsel-dash
+   dotspacemacs-additional-packages '(mmm-mode switch-window ivy-rich
+                                      vdiff helm-dash counsel-dash
                                       flx company-flx outline-magic composable
-                                      white-theme remark-mode)
+                                      white-theme remark-mode eziam-theme)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -146,6 +146,7 @@ values."
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(spacemacs-dark
                          white
+                         eziam-dark
                          )
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
@@ -363,31 +364,28 @@ you should place your code here."
   (add-hook 'yaml-mode-hook (lambda ()
                               (highlight-indentation-mode)
                               (highlight-indentation-set-offset 2)))
-                                        ; Visual line mode for text:
+  ; Visual line mode for text:
   (add-hook 'text-mode-hook 'visual-line-mode)
+
   ; Python options:
   (setq python-fill-docstring-style (quote symmetric))
-  ; Enable magithub
-  (require 'magithub)
-  (magithub-feature-autoinject t)
+
   ; enable switch-window
   (require 'switch-window)
   (global-set-key (kbd "C-x o") 'switch-window)
+
   ; nicer buffer switching
   (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
-  ; shift indent-based chunks (python, yaml)
-  (add-hook 'python-mode-hook 'indent-tools-minor-mode)
-  (add-hook 'yaml-mode-hook 'indent-tools-minor-mode)
-  (global-set-key (kbd "C-c .") 'indent-tools-hydra/body)
-  ; Search documentation
-  (global-set-key (kbd "C-c s") 'counsel-dash)
+
   ; better fuzzy matching
   (with-eval-after-load 'company
     (company-flx-mode +1))
+
   ; outline cycling for outline-minor-mode
   (add-hook 'prog-mode-hook 'outline-minor-mode)
   (add-hook 'yaml-mode-hook 'outline-minor-mode)
   (define-key outline-minor-mode-map (kbd "<C-tab>") 'outline-cycle)
+
   ; automatic virtualenv loading:
   (defun pyvenv-autoload ()
     (defun load-if-exists (path)
@@ -403,21 +401,30 @@ you should place your code here."
     (if (eq major-mode 'python-mode)
         (pyvenv-track-virtualenv)))
   (add-hook 'window-configuration-change-hook 'pyvenv-switch)
+
+  ; Search documentation
+  (global-set-key (kbd "C-c s") 'counsel-dash)
   ; dash set for Python 3
   (defun python-doc ()
     (interactive)
     (setq-local helm-dash-docsets '("Python 3")))
   (add-hook 'python-mode-hook 'python-doc)
+
   ; character level diffs
   (setq-default ediff-forward-word-function 'forward-char)
   (setq-default magit-diff-refine-hunk 't)
+
   ; keybinding for vc-ediff
   (global-set-key (kbd "M-m g d") 'vc-ediff)
+  ; keybinding for jumping back
+  (global-set-key (kbd "M-m j DEL") 'global-pop-mark)
+
   ; I hate changelog mode
   (delete '("[cC]hange\\.?[lL]og?\\'" . change-log-mode) auto-mode-alist)
   (delete '("[cC]hange[lL]og[-.][0-9]+\\'" . change-log-mode) auto-mode-alist)
   (delete '("\\$CHANGE_LOG\\$\\.TXT" . change-log-mode) auto-mode-alist)
   (delete '("[cC]hange[lL]og[-.][-0-9a-z]+\\'" . change-log-mode) auto-mode-alist)
+
   ; no background for comments
   (setq-default spacemacs-theme-comment-bg nil)
   )
