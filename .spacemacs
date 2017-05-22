@@ -336,11 +336,74 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
+
+  ;;; GENERAL ;;;
+
+  ; highlight matching parenthesis:
+  (show-paren-mode 1)
+
+  ;; After switching projects in projectile by default we want magit-status
+  (setq projectile-switch-project-action 'magit-status)
+
+  ; enable switch-window
+  (global-set-key (kbd "C-x o") 'switch-window)
+
+  ; nicer buffer switching
+  (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
+
+  ; Search documentation
+  (global-set-key (kbd "C-c s") 'counsel-dash)
+
+  ; outline cycling for outline-minor-mode
+  (add-hook 'prog-mode-hook 'outline-minor-mode)
+  (add-hook 'yaml-mode-hook 'outline-minor-mode)
+  (define-key outline-minor-mode-map (kbd "<C-tab>") 'outline-cycle)
+
+  ; Highlight indentation:
+  (add-hook 'prog-mode-hook 'highlight-indentation-mode)
+  (add-hook 'yaml-mode-hook (lambda ()
+                              (highlight-indentation-mode)
+                              (highlight-indentation-set-offset 2)))
+
+  ; character level diffs
+  (setq-default ediff-forward-word-function 'forward-char)
+  (setq-default magit-diff-refine-hunk 't)
+
+  ; keybinding for vc-ediff
+  (global-set-key (kbd "M-m g d") 'vc-ediff)
+
+  ; keybinding for jumping back
+  (global-set-key (kbd "M-m j DEL") 'pop-global-mark)
+
+  ; I hate changelog mode
+  (delete '("[cC]hange\\.?[lL]og?\\'" . change-log-mode) auto-mode-alist)
+  (delete '("[cC]hange[lL]og[-.][0-9]+\\'" . change-log-mode) auto-mode-alist)
+  (delete '("\\$CHANGE_LOG\\$\\.TXT" . change-log-mode) auto-mode-alist)
+  (delete '("[cC]hange[lL]og[-.][-0-9a-z]+\\'" . change-log-mode) auto-mode-alist)
+
+  ; no background for comments
+  (setq-default spacemacs-theme-comment-bg nil)
+
+
+
+  ;;; TEXT ;;;
+
   ; Enable spell-checking in text modes (but not YAML):
   (dolist (hook '(text-mode-hook))
     (add-hook hook (lambda () (flyspell-mode 1))))
   (dolist (hook '(yaml-mode-hook))
     (add-hook hook (lambda () (flyspell-mode -1))))
+
+  ; Visual line mode for text:
+  (add-hook 'text-mode-hook 'visual-line-mode)
+
+  ; style check
+  (flycheck-vale-setup)
+  (add-hook 'markdown-mode-hook 'flycheck-mode)
+  (add-hook 'rst-mode-hook 'flycheck-mode)
+
+  ; better dictionary
+  (global-set-key (kbd "M-m x w d") 'dictionary-lookup-definition)
 
   ; mmm-mode for markdown
   (markdown/init-mmm-mode)
@@ -353,35 +416,11 @@ you should place your code here."
   (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-yaml)
   (setq mmm-parse-when-idle 't)
 
-  ; highlight matching parenthesis:
-  (show-paren-mode 1)
 
-  ;; After switching projects in projectile by default we want magit-status
-  (setq projectile-switch-project-action 'magit-status)
 
-  ;; Highlight indentation:
-  (add-hook 'prog-mode-hook 'highlight-indentation-mode)
-  (add-hook 'yaml-mode-hook (lambda ()
-                              (highlight-indentation-mode)
-                              (highlight-indentation-set-offset 2)))
+  ;;; PYTHON ;;;
 
-  ; Visual line mode for text:
-  (add-hook 'text-mode-hook 'visual-line-mode)
-
-  ; Python options:
   (setq python-fill-docstring-style (quote symmetric))
-
-  ; enable switch-window
-  (require 'switch-window)
-  (global-set-key (kbd "C-x o") 'switch-window)
-
-  ; nicer buffer switching
-  (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
-
-  ; outline cycling for outline-minor-mode
-  (add-hook 'prog-mode-hook 'outline-minor-mode)
-  (add-hook 'yaml-mode-hook 'outline-minor-mode)
-  (define-key outline-minor-mode-map (kbd "<C-tab>") 'outline-cycle)
 
   ; automatic virtualenv loading:
   (defun pyvenv-autoload ()
@@ -399,39 +438,11 @@ you should place your code here."
         (pyvenv-track-virtualenv)))
   (add-hook 'window-configuration-change-hook 'pyvenv-switch)
 
-  ; Search documentation
-  (global-set-key (kbd "C-c s") 'counsel-dash)
   ; dash set for Python 3
   (defun python-doc ()
     (interactive)
     (setq-local helm-dash-docsets '("Python 3")))
   (add-hook 'python-mode-hook 'python-doc)
-
-  ; character level diffs
-  (setq-default ediff-forward-word-function 'forward-char)
-  (setq-default magit-diff-refine-hunk 't)
-
-  ; keybinding for vc-ediff
-  (global-set-key (kbd "M-m g d") 'vc-ediff)
-  ; keybinding for jumping back
-  (global-set-key (kbd "M-m j DEL") 'pop-global-mark)
-
-  ; I hate changelog mode
-  (delete '("[cC]hange\\.?[lL]og?\\'" . change-log-mode) auto-mode-alist)
-  (delete '("[cC]hange[lL]og[-.][0-9]+\\'" . change-log-mode) auto-mode-alist)
-  (delete '("\\$CHANGE_LOG\\$\\.TXT" . change-log-mode) auto-mode-alist)
-  (delete '("[cC]hange[lL]og[-.][-0-9a-z]+\\'" . change-log-mode) auto-mode-alist)
-
-  ; no background for comments
-  (setq-default spacemacs-theme-comment-bg nil)
-
-  ; style check
-  (flycheck-vale-setup)
-  (add-hook 'markdown-mode-hook 'flycheck-mode)
-  (add-hook 'rst-mode-hook 'flycheck-mode)
-
-  ; better dictionary
-  (global-set-key (kbd "M-m x w d") 'dictionary-lookup-definition)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
