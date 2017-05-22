@@ -72,7 +72,9 @@ values."
    dotspacemacs-additional-packages '(mmm-mode switch-window ivy-rich
                                       helm-dash counsel-dash flycheck-vale
                                       flx company-flx outline-magic composable
-                                      white-theme remark-mode eziam-theme)
+                                      white-theme remark-mode eziam-theme
+                                      dictionary
+                                      )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -432,6 +434,9 @@ you should place your code here."
   (flycheck-vale-setup)
   (add-hook 'markdown-mode-hook 'flycheck-mode)
   (add-hook 'rst-mode-hook 'flycheck-mode)
+
+  ; better dictionary
+  (global-set-key (kbd "M-m x w d") 'dictionary-lookup-definition)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
