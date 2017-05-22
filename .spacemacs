@@ -70,7 +70,7 @@ values."
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(mmm-mode switch-window ivy-rich
-                                      vdiff helm-dash counsel-dash
+                                      helm-dash counsel-dash flycheck-vale
                                       flx company-flx outline-magic composable
                                       white-theme remark-mode eziam-theme)
    ;; A list of packages that cannot be updated.
@@ -427,6 +427,11 @@ you should place your code here."
 
   ; no background for comments
   (setq-default spacemacs-theme-comment-bg nil)
+
+  ; style check
+  (flycheck-vale-setup)
+  (add-hook 'markdown-mode-hook 'flycheck-mode)
+  (add-hook 'rst-mode-hook 'flycheck-mode)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
