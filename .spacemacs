@@ -69,10 +69,15 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(mmm-mode switch-window ivy-rich
-                                      helm-dash counsel-dash flycheck-vale
-                                      flx company-flx outline-magic composable
-                                      white-theme remark-mode eziam-theme
+   dotspacemacs-additional-packages '(mmm-mode
+                                      switch-window
+                                      ivy-rich
+                                      helm-dash counsel-dash
+                                      flycheck-vale
+                                      outline-magic
+                                      white-theme
+                                      remark-mode
+                                      eziam-theme
                                       dictionary
                                       )
    ;; A list of packages that cannot be updated.
@@ -331,22 +336,12 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-  ; 2-space indentation in react files:
-  (setq-default
-   ;; js2-mode
-   js2-basic-offset 2
-
-   ;; web-mode
-   css-indent-offset 2
-   web-mode-markup-indent-offset 2
-   web-mode-css-indent-offset 2
-   web-mode-code-indent-offset 2
-   web-mode-attr-indent-offset 2)
   ; Enable spell-checking in text modes (but not YAML):
   (dolist (hook '(text-mode-hook))
     (add-hook hook (lambda () (flyspell-mode 1))))
   (dolist (hook '(yaml-mode-hook))
     (add-hook hook (lambda () (flyspell-mode -1))))
+
   ; mmm-mode for markdown
   (markdown/init-mmm-mode)
   (setq mmm-global-mode 'maybe)
@@ -357,15 +352,19 @@ you should place your code here."
                       :back "^```$")))
   (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-yaml)
   (setq mmm-parse-when-idle 't)
+
   ; highlight matching parenthesis:
   (show-paren-mode 1)
+
   ;; After switching projects in projectile by default we want magit-status
   (setq projectile-switch-project-action 'magit-status)
+
   ;; Highlight indentation:
   (add-hook 'prog-mode-hook 'highlight-indentation-mode)
   (add-hook 'yaml-mode-hook (lambda ()
                               (highlight-indentation-mode)
                               (highlight-indentation-set-offset 2)))
+
   ; Visual line mode for text:
   (add-hook 'text-mode-hook 'visual-line-mode)
 
@@ -378,10 +377,6 @@ you should place your code here."
 
   ; nicer buffer switching
   (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
-
-  ; better fuzzy matching
-  (with-eval-after-load 'company
-    (company-flx-mode +1))
 
   ; outline cycling for outline-minor-mode
   (add-hook 'prog-mode-hook 'outline-minor-mode)
