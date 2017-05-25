@@ -79,6 +79,7 @@ values."
                                       remark-mode
                                       eziam-theme
                                       dictionary
+                                      discover-my-major
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -384,7 +385,9 @@ you should place your code here."
   ; no background for comments
   (setq-default spacemacs-theme-comment-bg nil)
 
-
+  ; mode-specific help
+  (global-set-key (kbd "C-h C-m") 'discover-my-major)
+  (global-set-key (kbd "C-h M-m") 'discover-my-mode)
 
   ;;; TEXT ;;;
 
