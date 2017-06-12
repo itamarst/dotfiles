@@ -341,6 +341,7 @@ you should place your code here."
   ;;; GENERAL ;;;
 
   ; highlight matching parenthesis:
+  (setq show-paren-delay 0)
   (show-paren-mode 1)
 
   ;; After switching projects in projectile by default we want magit-status
