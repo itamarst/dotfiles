@@ -38,13 +38,13 @@ values."
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
      ;; <M-m f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
-     ivy
+     ;ivy
+     helm
      auto-completion
      better-defaults
      emacs-lisp
      git
      markdown
-     ;; org
      (shell :variables
             shell-default-height 30
             shell-default-position 'bottom)
@@ -71,8 +71,8 @@ values."
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(mmm-mode
                                       switch-window
-                                      ivy-rich
-                                      helm-dash counsel-dash
+                                      ;ivy-rich
+                                      helm-dash
                                       flycheck-vale
                                       outline-magic
                                       white-theme
@@ -351,10 +351,10 @@ you should place your code here."
   (global-set-key (kbd "C-x o") 'switch-window)
 
   ; nicer buffer switching
-  (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
+  ;(ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
 
   ; Search documentation
-  (global-set-key (kbd "C-c s") 'counsel-dash)
+  (global-set-key (kbd "C-c s") 'helm-dash)
 
   ; outline cycling for outline-minor-mode
   (add-hook 'prog-mode-hook 'outline-minor-mode)
