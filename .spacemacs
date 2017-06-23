@@ -61,7 +61,7 @@ values."
      c-c++
      html
      org
-     semantic
+     ;semantic
      imenu-list
      docker
      )
@@ -80,6 +80,7 @@ values."
                                       eziam-theme
                                       dictionary
                                       discover-my-major
+                                      sudo-ext
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -384,11 +385,15 @@ you should place your code here."
   (delete '("[cC]hange[lL]og[-.][-0-9a-z]+\\'" . change-log-mode) auto-mode-alist)
 
   ; no background for comments
-  (setq-default spacemacs-theme-comment-bg nil)
+  (setq spacemacs-theme-comment-bg nil)
 
   ; mode-specific help
   (global-set-key (kbd "C-h C-m") 'discover-my-major)
   (global-set-key (kbd "C-h M-m") 'discover-my-mode)
+
+  ; faster comint
+  (setq-default bidi-display-reordering nil)
+
 
   ;;; TEXT ;;;
 
@@ -426,21 +431,21 @@ you should place your code here."
 
   (setq python-fill-docstring-style (quote symmetric))
 
-  ; automatic virtualenv loading:
-  (defun pyvenv-autoload ()
-    (defun load-if-exists (path)
-      (if (file-exists-p path)
-          (progn
-            (pyvenv-activate path)
-            (setq-local pyvenv-activate path))))
-    (let* ((pdir (projectile-project-root)))
-      (load-if-exists (concat pdir "/virtualenv"))
-      (load-if-exists (concat pdir "/venv"))))
-  (add-hook 'python-mode-hook 'pyvenv-autoload)
-  (defun pyvenv-switch ()
-    (if (eq major-mode 'python-mode)
-        (pyvenv-track-virtualenv)))
-  (add-hook 'window-configuration-change-hook 'pyvenv-switch)
+  ;; ; automatic virtualenv loading:
+  ;; (defun pyvenv-autoload ()
+  ;;   (defun load-if-exists (path)
+  ;;     (if (file-exists-p path)
+  ;;         (progn
+  ;;           (pyvenv-activate path)
+  ;;           (setq-local pyvenv-activate path))))
+  ;;   (let* ((pdir (projectile-project-root)))
+  ;;     (load-if-exists (concat pdir "/virtualenv"))
+  ;;     (load-if-exists (concat pdir "/venv"))))
+  ;; (add-hook 'python-mode-hook 'pyvenv-autoload)
+  ;; (defun pyvenv-switch ()
+  ;;   (if (eq major-mode 'python-mode)
+  ;;       (pyvenv-track-virtualenv)))
+  ;; (add-hook 'window-configuration-change-hook 'pyvenv-switch)
 
   ; dash set for Python 3
   (defun python-doc ()
