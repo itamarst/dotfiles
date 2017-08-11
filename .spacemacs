@@ -81,6 +81,8 @@ values."
                                       dictionary
                                       discover-my-major
                                       sudo-ext
+                                      sr-speedbar
+                                      projectile-speedbar
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -394,6 +396,8 @@ you should place your code here."
   ; faster comint
   (setq-default bidi-display-reordering nil)
 
+  ; speedbar on left
+  (setq sr-speedbar-right-side nil)
 
   ;;; TEXT ;;;
 
