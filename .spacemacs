@@ -71,7 +71,6 @@ values."
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(mmm-mode
                                       switch-window
-                                      ;ivy-rich
                                       helm-dash
                                       flycheck-vale
                                       outline-magic
@@ -83,6 +82,7 @@ values."
                                       sudo-ext
                                       sr-speedbar
                                       projectile-speedbar
+                                      beginend
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -399,6 +399,9 @@ you should place your code here."
   ; speedbar on left
   (setq sr-speedbar-right-side nil)
 
+  ; M-< and M-> with better defaults
+  (beginend-global-mode)
+
   ;;; TEXT ;;;
 
   ; Enable spell-checking in text modes (but not YAML):
@@ -418,16 +421,16 @@ you should place your code here."
   ; better dictionary
   (global-set-key (kbd "M-m x w d") 'dictionary-lookup-definition)
 
-  ; mmm-mode for markdown
-  (markdown/init-mmm-mode)
-  (setq mmm-global-mode 'maybe)
-  (mmm-add-classes '((markdown-yaml
-                      :submode yaml-mode
-                      :face mmm-declaration-submode-face
-                      :front "^```yaml[\n\r]+"
-                      :back "^```$")))
-  (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-yaml)
-  (setq mmm-parse-when-idle 't)
+  ; mmm-mode for markdown (use C-C ' instead)
+  ;(markdown/init-mmm-mode)
+  ;(setq mmm-global-mode nil)
+  ;(mmm-add-classes '((markdown-yaml
+  ;                    :submode yaml-mode
+  ;                    :face mmm-declaration-submode-face
+  ;                    :front "^```yaml[\n\r]+"
+  ;                    :back "^```$")))
+  ;(mmm-add-mode-ext-class 'markdown-mode nil 'markdown-yaml)
+  ;(setq mmm-parse-when-idle 't)
 
 
 
