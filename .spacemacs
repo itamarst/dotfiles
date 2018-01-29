@@ -52,7 +52,8 @@ values."
      (syntax-checking :variables
                       syntax-checking-enable-tooltips nil)
      version-control
-     python
+     (python :variables
+             python-test-runner 'pytest)
      javascript
      yaml
      react
@@ -83,6 +84,8 @@ values."
                                       sr-speedbar
                                       projectile-speedbar
                                       beginend
+                                      visual-regexp-steroids
+                                      python-docstring
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -457,7 +460,7 @@ you should place your code here."
   ; dash set for Python 3
   (defun python-doc ()
     (interactive)
-    (setq-local helm-dash-docsets '("Python 3")))
+    (setq-local helm-dash-docsets '("Python 3"  "NumPy")))
   (add-hook 'python-mode-hook 'python-doc)
 
   ; imenu-list
