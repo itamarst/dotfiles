@@ -52,7 +52,7 @@ values."
      (syntax-checking :variables
                       syntax-checking-enable-tooltips nil)
      version-control
-     python
+     (python :variables python-test-runner 'pytest)
      javascript
      yaml
      react
@@ -431,8 +431,7 @@ you should place your code here."
   ;                    :back "^```$")))
   ;(mmm-add-mode-ext-class 'markdown-mode nil 'markdown-yaml)
   ;(setq mmm-parse-when-idle 't)
-
-
+  (setq markdown-command "pandoc")
 
   ;;; PYTHON ;;;
 
