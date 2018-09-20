@@ -86,6 +86,8 @@ values."
                                       beginend
                                       visual-regexp-steroids
                                       python-docstring
+                                      python-pytest
+                                      traad
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -167,7 +169,6 @@ values."
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
    dotspacemacs-default-font '("Source Code Pro"
-                               :size 17
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
@@ -405,6 +406,9 @@ you should place your code here."
   ; M-< and M-> with better defaults
   (beginend-global-mode)
 
+  ; hide spaceline minor modes
+  (setq spaceline-minor-modes-p nil)
+
   ;;; TEXT ;;;
 
   ; Enable spell-checking in text modes (but not YAML):
@@ -440,6 +444,7 @@ you should place your code here."
   ;;; PYTHON ;;;
 
   (setq python-fill-docstring-style (quote symmetric))
+  (spacemacs/set-leader-keys-for-major-mode 'python-mode "t ." 'python-pytest-popup)
 
   ;; ; automatic virtualenv loading:
   ;; (defun pyvenv-autoload ()
@@ -462,9 +467,14 @@ you should place your code here."
     (interactive)
     (setq-local helm-dash-docsets '("Python 3"  "NumPy")))
   (add-hook 'python-mode-hook 'python-doc)
+  (add-hook 'python-mode-hook 'python-docstring-mode)
 
   ; imenu-list
   (setq imenu-list-position 'left)
+  (setq org-src-fontify-natively t)
+  (setq org-todo-keywords
+        '((sequence "TODO" "IN-PROGRESS" "|" "DONE")))
+
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
