@@ -88,6 +88,7 @@ values."
                                       python-docstring
                                       python-pytest
                                       traad
+                                      writeroom-mode
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -347,6 +348,8 @@ you should place your code here."
 
   ;;; GENERAL ;;;
 
+  (setq-default line-spacing 2)
+
   ; highlight matching parenthesis:
   (setq show-paren-delay 0)
   (show-paren-mode 1)
@@ -408,6 +411,19 @@ you should place your code here."
 
   ; hide spaceline minor modes
   (setq spaceline-minor-modes-p nil)
+
+  ; writing mode
+  (defun writemode-on ()
+    (interactive)
+    (spacemacs/toggle-line-numbers-off)
+    (spacemacs/toggle-vi-tilde-fringe-off)
+    (writeroom-mode 1))
+
+  (defun writemode-off ()
+    (interactive)
+    (spacemacs/toggle-line-numbers-on)
+    (spacemacs/toggle-vi-tilde-fringe-on)
+    (writeroom-mode 0))
 
   ;;; TEXT ;;;
 
