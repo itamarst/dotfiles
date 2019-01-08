@@ -384,6 +384,9 @@ you should place your code here."
   (setq-default ediff-forward-word-function 'forward-char)
   (setq-default magit-diff-refine-hunk 't)
 
+  ; Store git references to work-in-progress code:
+  (magit-wip-mode)
+
   ; keybinding for vc-ediff
   (global-set-key (kbd "M-m g d") 'vc-ediff)
 
