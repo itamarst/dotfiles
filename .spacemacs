@@ -31,6 +31,8 @@ values."
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
+     sql
+     csv
      ruby
      asciidoc
      ;; ----------------------------------------------------------------
@@ -51,7 +53,9 @@ values."
      (spell-checking :variables spell-checking-enable-by-default nil)
      (syntax-checking :variables
                       syntax-checking-enable-tooltips nil)
-     version-control
+     (version-control :variables
+                      version-control-diff-tool 'diff-hl
+                      version-control-diff-side 'left)
      (python :variables
              python-test-runner 'pytest)
      javascript
@@ -62,7 +66,7 @@ values."
      c-c++
      html
      org
-     ;semantic
+     semantic
      imenu-list
      docker
      )
@@ -89,6 +93,7 @@ values."
                                       python-pytest
                                       traad
                                       writeroom-mode
+                                      blacken
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -386,6 +391,10 @@ you should place your code here."
 
   ; Store git references to work-in-progress code:
   (magit-wip-mode)
+  (magit-define-popup-action 'magit-file-popup
+    ?R "Rename file" 'magit-file-rename)
+  (magit-define-popup-action 'magit-file-popup
+    ?K "Delete file" 'magit-file-delete)
 
   ; keybinding for vc-ediff
   (global-set-key (kbd "M-m g d") 'vc-ediff)
