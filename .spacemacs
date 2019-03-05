@@ -94,6 +94,7 @@ values."
                                       traad
                                       writeroom-mode
                                       blacken
+                                      company-box
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -370,6 +371,9 @@ you should place your code here."
 
   ; nicer buffer switching
   ;(ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
+
+  ; Nicer autocomplete
+  (add-hook 'company-mode-hook 'company-box-mode)
 
   ; Search documentation
   (global-set-key (kbd "C-c s") 'helm-dash)
