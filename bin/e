@@ -1,2 +1,8 @@
-#!/bin/sh
-exec emacs --no-init-file -nw "$@"
+#!/bin/bash
+set -e
+if [ -z "$INSIDE_EMACS" ]; then
+    # Fast startup of non-Spacemacs, just for quick editing:
+    exec emacs --no-init-file -nw "$@"
+fi
+# We're running inside emacs terminal, just load it in main emacs:
+exec emacsclient -n "$@"
