@@ -62,7 +62,7 @@ values."
      yaml
      react
      shell-scripts
-     go
+     (go :variables gofmt-command "goimports" go-tab-width nil)
      c-c++
      html
      org
@@ -95,6 +95,8 @@ values."
                                       writeroom-mode
                                       blacken
                                       company-box
+                                      edit-indirect
+                                      editorconfig
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -473,7 +475,7 @@ you should place your code here."
   ;                    :back "^```$")))
   ;(mmm-add-mode-ext-class 'markdown-mode nil 'markdown-yaml)
   ;(setq mmm-parse-when-idle 't)
-  (setq markdown-command "pandoc")
+  (setq markdown-command "pandoc -s")
 
   ;;; PYTHON ;;;
 
@@ -499,7 +501,7 @@ you should place your code here."
   ; dash set for Python 3
   (defun python-doc ()
     (interactive)
-    (setq-local helm-dash-docsets '("Python 3"  "NumPy")))
+    (setq-local helm-dash-docsets '("Python 3")))
   (add-hook 'python-mode-hook 'python-doc)
   (add-hook 'python-mode-hook 'python-docstring-mode)
 
