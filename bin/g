@@ -1,0 +1,2 @@
+#!/bin/sh
+exec e -e '(magit-status)'
