@@ -511,6 +511,10 @@ you should place your code here."
   (setq org-todo-keywords
         '((sequence "TODO" "IN-PROGRESS" "|" "DONE")))
 
+  ; pasting in terminals
+  (eval-after-load "term"
+    '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
+
   ; smerge mode for merge conflicts visited from magit diff
   (use-package smerge-mode
   :config
