@@ -54,7 +54,8 @@ This function should only modify configuration layer settings."
      treemacs
      (shell :variables
             shell-default-height 30
-            shell-default-position 'bottom)
+            shell-default-position 'bottom
+            shell-default-shell 'vterm)
      (spell-checking :variables spell-checking-enable-by-default nil)
      (syntax-checking :variables
                       syntax-checking-enable-tooltips nil)
@@ -507,7 +508,7 @@ configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
     ;;; GENERAL ;;;
-
+  (start-server)
   (setq-default line-spacing 2)
 
   ; highlight matching parenthesis:
@@ -525,6 +526,9 @@ before packages are loaded."
 
   ; nicer buffer switching
   ;(ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
+
+  ; Rust
+  (setq rust-format-on-save 't)
 
   ; Nicer autocomplete
   (add-hook 'python-mode-hook 'company-box-mode)
@@ -681,7 +685,8 @@ before packages are loaded."
   ; pasting in terminals
   (eval-after-load "term"
     '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
-
+  (eval-after-load "vterm"
+    '(define-key vterm-mode-map (kbd "C-c C-y") 'vterm-yank-primary))
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
