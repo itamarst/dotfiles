@@ -32,7 +32,7 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(
+   '(ruby
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press `SPC f e R' (Vim style) or
@@ -45,7 +45,7 @@ This function should only modify configuration layer settings."
      helm
      ;; lsp
      markdown
-     rust
+     (rust :variables rust-backend 'lsp)
      ;; multiple-cursors
      ;; org
      ;; (shell :variables
@@ -72,6 +72,9 @@ This function should only modify configuration layer settings."
      html
      org
      docker
+     deft
+     dap
+     lsp
      )
 
    ;; List of additional packages that will be installed without being
@@ -508,7 +511,7 @@ configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
     ;;; GENERAL ;;;
-  (start-server)
+  (server-start)
   (setq-default line-spacing 2)
 
   ; highlight matching parenthesis:
@@ -517,7 +520,7 @@ before packages are loaded."
 
   ;; speed up linum-relative
   (setq linum-relative-backend 'display-line-numbers-mode)
-  
+
   ;; After switching projects in projectile by default we want magit-status
   (setq projectile-switch-project-action 'magit-status)
 
@@ -529,7 +532,8 @@ before packages are loaded."
 
   ; Rust
   (setq rust-format-on-save 't)
-
+  (setq lsp-ui-doc-enable nil)
+  
   ; Nicer autocomplete
   (add-hook 'python-mode-hook 'company-box-mode)
 
@@ -687,6 +691,13 @@ before packages are loaded."
     '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
   (eval-after-load "vterm"
     '(define-key vterm-mode-map (kbd "C-c C-y") 'vterm-yank-primary))
+
+  ; org-brain
+  (setq org-brain-path "~/Devel/slipbox/archive")
+  (defun show-org-brain-visualize-keys ()
+    (interactive)
+    (which-key-show-keymap 'org-brain-visualize-mode-map))
+  (spacemacs/set-leader-keys-for-major-mode 'org-brain-visualize-mode "?" 'show-org-brain-visualize-keys)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -703,7 +714,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (yasnippet-snippets yapfify yaml-mode xterm-color web-mode web-beautify vterm visual-regexp-steroids visual-regexp unfill treemacs-magit traad virtualenvwrapper toml-mode terminal-here tagedit switch-window sudo-ext smeargle slim-mode shell-pop scss-mode sass-mode remark-mode racer python-pytest python-docstring pytest pyenv-mode py-isort pug-mode prettier-js pippel pipenv pyvenv pip-requirements pandoc-mode outline-magic origami orgit org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download org-cliplink org-brain org-ql peg ov org-super-agenda ts nodejs-repl mwim multi-term mmm-mode markdown-toc magit-svn magit-gitflow magit-popup livid-mode skewer-mode live-py-mode json-navigator hierarchy js2-refactor multiple-cursors js2-mode js-doc insert-shebang importmagic epc ctable concurrent impatient-mode simple-httpd htmlize helm-rtags helm-pydoc helm-org-rifle helm-org helm-gitignore helm-git-grep helm-dash dash-docs helm-css-scss helm-company helm-c-yasnippet haml-mode graphviz-dot-mode google-c-style godoctor go-tag go-rename go-impl go-guru go-gen-test go-fill-struct go-eldoc gnuplot gitignore-templates gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flyspell-correct-helm flyspell-correct flycheck-ycmd flycheck-vale flycheck-rust flycheck-rtags flycheck-pos-tip pos-tip flycheck-bashate fish-mode evil-org evil-magit magit git-commit with-editor eshell-z eshell-prompt-extras esh-help emmet-mode edit-indirect dockerfile-mode docker transient tablist json-mode docker-tramp json-snatcher json-reformat discover-my-major makey disaster diff-hl dictionary link connection cython-mode cpp-auto-include company-ycmd ycmd request-deferred deferred company-web web-completion-data company-tern dash-functional tern company-statistics company-shell company-rtags rtags company-go go-mode company-c-headers company-anaconda company clang-format cargo markdown-mode rust-mode browse-at-remote blacken beginend auto-yasnippet yasnippet auto-dictionary anaconda-mode pythonic ac-ispell auto-complete ws-butler writeroom-mode visual-fill-column winum volatile-highlights vi-tilde-fringe uuidgen treemacs-projectile treemacs ht pfuture toc-org symon symbol-overlay string-inflection spaceline-all-the-icons spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode password-generator paradox spinner overseer org-bullets open-junk-file nameless move-text macrostep lorem-ipsum link-hint indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-xref helm-themes helm-swoop helm-purpose window-purpose imenu-list helm-projectile projectile helm-mode-manager helm-make helm-ls-git helm-flx helm-descbinds helm-ag google-translate golden-ratio flycheck-package package-lint flycheck pkg-info epl let-alist flycheck-elsa flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state iedit evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens smartparens paredit evil-args evil-anzu anzu eval-sexp-fu elisp-slime-nav editorconfig dumb-jump doom-modeline shrink-path all-the-icons memoize f dash s devdocs define-word column-enforce-mode clean-aindent-mode centered-cursor-mode auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup which-key use-package pcre2el org-plus-contrib hydra lv hybrid-mode font-lock+ evil goto-chg undo-tree dotenv-mode diminish bind-map bind-key async))))
+    (ascii-art-to-unicode zetteldeft deft seeing-is-believing rvm ruby-tools ruby-test-mode ruby-refactor ruby-hash-syntax rubocopfmt rubocop rspec-mode robe rbenv rake minitest helm-gtags ggtags enh-ruby-mode counsel-gtags counsel swiper ivy chruby bundler inf-ruby lsp-ui lsp-python-ms helm-lsp dap-mode lsp-treemacs bui cquery company-lsp ccls lsp-mode yasnippet-snippets yapfify yaml-mode xterm-color web-mode web-beautify vterm visual-regexp-steroids visual-regexp unfill treemacs-magit traad virtualenvwrapper toml-mode terminal-here tagedit switch-window sudo-ext smeargle slim-mode shell-pop scss-mode sass-mode remark-mode racer python-pytest python-docstring pytest pyenv-mode py-isort pug-mode prettier-js pippel pipenv pyvenv pip-requirements pandoc-mode outline-magic origami orgit org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download org-cliplink org-brain org-ql peg ov org-super-agenda ts nodejs-repl mwim multi-term mmm-mode markdown-toc magit-svn magit-gitflow magit-popup livid-mode skewer-mode live-py-mode json-navigator hierarchy js2-refactor multiple-cursors js2-mode js-doc insert-shebang importmagic epc ctable concurrent impatient-mode simple-httpd htmlize helm-rtags helm-pydoc helm-org-rifle helm-org helm-gitignore helm-git-grep helm-dash dash-docs helm-css-scss helm-company helm-c-yasnippet haml-mode graphviz-dot-mode google-c-style godoctor go-tag go-rename go-impl go-guru go-gen-test go-fill-struct go-eldoc gnuplot gitignore-templates gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flyspell-correct-helm flyspell-correct flycheck-ycmd flycheck-vale flycheck-rust flycheck-rtags flycheck-pos-tip pos-tip flycheck-bashate fish-mode evil-org evil-magit magit git-commit with-editor eshell-z eshell-prompt-extras esh-help emmet-mode edit-indirect dockerfile-mode docker transient tablist json-mode docker-tramp json-snatcher json-reformat discover-my-major makey disaster diff-hl dictionary link connection cython-mode cpp-auto-include company-ycmd ycmd request-deferred deferred company-web web-completion-data company-tern dash-functional tern company-statistics company-shell company-rtags rtags company-go go-mode company-c-headers company-anaconda company clang-format cargo markdown-mode rust-mode browse-at-remote blacken beginend auto-yasnippet yasnippet auto-dictionary anaconda-mode pythonic ac-ispell auto-complete ws-butler writeroom-mode visual-fill-column winum volatile-highlights vi-tilde-fringe uuidgen treemacs-projectile treemacs ht pfuture toc-org symon symbol-overlay string-inflection spaceline-all-the-icons spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode password-generator paradox spinner overseer org-bullets open-junk-file nameless move-text macrostep lorem-ipsum link-hint indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-xref helm-themes helm-swoop helm-purpose window-purpose imenu-list helm-projectile projectile helm-mode-manager helm-make helm-ls-git helm-flx helm-descbinds helm-ag google-translate golden-ratio flycheck-package package-lint flycheck pkg-info epl let-alist flycheck-elsa flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state iedit evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens smartparens paredit evil-args evil-anzu anzu eval-sexp-fu elisp-slime-nav editorconfig dumb-jump doom-modeline shrink-path all-the-icons memoize f dash s devdocs define-word column-enforce-mode clean-aindent-mode centered-cursor-mode auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup which-key use-package pcre2el org-plus-contrib hydra lv hybrid-mode font-lock+ evil goto-chg undo-tree dotenv-mode diminish bind-map bind-key async))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
