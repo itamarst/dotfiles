@@ -63,6 +63,8 @@ This function should only modify configuration layer settings."
                       version-control-diff-tool 'diff-hl
                       version-control-diff-side 'left)
      (python :variables
+             python-formatter 'black
+             python-backend 'anaconda
              python-test-runner 'pytest)
      javascript
      yaml
