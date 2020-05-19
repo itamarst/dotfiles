@@ -639,6 +639,14 @@ before packages are loaded."
   (add-hook 'markdown-mode-hook 'flycheck-mode)
   (add-hook 'rst-mode-hook 'flycheck-mode)
 
+  ; Jekyll
+  (defun jekyll-insert-post-url ()
+    (interactive)
+    (let* ((files (remove "." (mapcar #'file-name-sans-extension (directory-files "."))))
+           (selected-file (completing-read "Select article: " files nil t)))
+      (insert (format "{%% post_url %s %%}" selected-file))))
+  (spacemacs/set-leader-keys-for-major-mode 'markdown-mode "i p" 'jekyll-insert-post-url)
+
   ; better dictionary
   (global-set-key (kbd "M-m x w d") 'dictionary-lookup-definition)
 
