@@ -535,9 +535,6 @@ before packages are loaded."
   ; Rust
   (setq rust-format-on-save 't)
   (setq lsp-ui-doc-enable nil)
-  
-  ; Nicer autocomplete
-  (add-hook 'python-mode-hook 'company-box-mode)
 
   ; Search documentation
   (global-set-key (kbd "C-c s") 'helm-dash)
