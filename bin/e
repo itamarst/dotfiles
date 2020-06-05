@@ -4,5 +4,10 @@ if [ -z "$INSIDE_EMACS" ]; then
     # Fast startup of non-Spacemacs, just for quick editing:
     exec emacs --no-init-file -nw "$@"
 fi
+
 # We're running inside emacs terminal, just load it in main emacs:
-exec emacsclient -n -e "(find-file-other-window \"$1\")"
+if [ "$#" = "1" ]; then
+    exec emacsclient -n -e "(find-file-other-window \"$1\")"
+else
+    exec emacsclient -n "$@"
+fi
