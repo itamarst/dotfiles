@@ -5,4 +5,4 @@ if [ -z "$INSIDE_EMACS" ]; then
     exec emacs --no-init-file -nw "$@"
 fi
 # We're running inside emacs terminal, just load it in main emacs:
-exec emacsclient -n "$@"
+exec emacsclient -n -e "(find-file-other-window \"$1\")"
