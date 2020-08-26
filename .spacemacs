@@ -644,6 +644,8 @@ before packages are loaded."
       (insert (format "{%% post_url %s %%}" selected-file))))
   (spacemacs/set-leader-keys-for-major-mode 'markdown-mode "i p" 'jekyll-insert-post-url)
 
+  (define-key markdown-mode-map (kbd "C-c '") 'markdown-edit-code-block)
+
   ; better dictionary
   (global-set-key (kbd "M-m x w d") 'dictionary-lookup-definition)
 
