@@ -45,7 +45,7 @@ This function should only modify configuration layer settings."
      helm
      ;; lsp
      markdown
-     (rust :variables rust-backend 'lsp)
+     (rust :variables rust-backend 'lsp lsp-rust-server 'rust-analyzer)
      ;; multiple-cursors
      ;; org
      ;; (shell :variables
@@ -696,8 +696,9 @@ before packages are loaded."
   ; pasting in terminals
   (eval-after-load "term"
     '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
+  ; make C-y passthrough in vterm; can still use C-c C-y to get from emacs
   (eval-after-load "vterm"
-    '(define-key vterm-mode-map (kbd "C-c C-y") 'vterm-yank-primary))
+    (define-key vterm-mode-map (kbd "C-y") 'vterm--self-insert))
 
   ; org-brain
   (setq org-brain-path "~/Devel/slipbox/archive")
