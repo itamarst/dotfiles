@@ -32,7 +32,8 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(ruby
+   '(windows-scripts
+     ruby
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press `SPC f e R' (Vim style) or
@@ -65,7 +66,11 @@ This function should only modify configuration layer settings."
      (python :variables
              python-formatter 'black
              python-backend 'anaconda
-             python-test-runner 'pytest)
+             python-test-runner 'pytest
+             pyvenv-tracking-mode nil
+             ;auto-set-local-pyvenv-virtualenv nil
+             ;python-auto-set-local-pyenv-version nil
+             )
      javascript
      yaml
      shell-scripts
@@ -77,6 +82,8 @@ This function should only modify configuration layer settings."
      deft
      dap
      lsp
+     ipython-notebook
+     spacemacs-purpose
      )
 
    ;; List of additional packages that will be installed without being
@@ -104,10 +111,12 @@ This function should only modify configuration layer settings."
                                       traad
                                       writeroom-mode
                                       blacken
-                                      company-box
-                                      edit-indirect
                                       editorconfig
                                       graphviz-dot-mode
+                                      separedit
+                                      nix-mode
+                                      edit-indirect
+                                      so-long
                                       )
 
    ;; A list of packages that cannot be updated.
@@ -580,8 +589,11 @@ before packages are loaded."
   (global-set-key (kbd "C-h C-m") 'discover-my-major)
   (global-set-key (kbd "C-h M-m") 'discover-my-mode)
 
-  ; faster comint
-  (setq-default bidi-display-reordering nil)
+  ; faster long lines?
+  (setq-default bidi-paragraph-direction 'left-to-right)
+  (if (version<= "27.1" emacs-version)
+      (setq bidi-inhibit-bpa t))
+  (global-so-long-mode 1)
 
   ; speedbar on left
   (setq sr-speedbar-right-side nil)
@@ -644,7 +656,8 @@ before packages are loaded."
       (insert (format "{%% post_url %s %%}" selected-file))))
   (spacemacs/set-leader-keys-for-major-mode 'markdown-mode "i p" 'jekyll-insert-post-url)
 
-  (define-key markdown-mode-map (kbd "C-c '") 'markdown-edit-code-block)
+  (eval-after-load "markdown"
+    '(define-key markdown-mode-map (kbd "C-c '") 'markdown-edit-code-block))
 
   ; better dictionary
   (global-set-key (kbd "M-m x w d") 'dictionary-lookup-definition)
@@ -666,28 +679,19 @@ before packages are loaded."
   (setq python-fill-docstring-style (quote symmetric))
   (spacemacs/set-leader-keys-for-major-mode 'python-mode "t ." 'python-pytest-popup)
 
-  ;; ; automatic virtualenv loading:
-  ;; (defun pyvenv-autoload ()
-  ;;   (defun load-if-exists (path)
-  ;;     (if (file-exists-p path)
-  ;;         (progn
-  ;;           (pyvenv-activate path)
-  ;;           (setq-local pyvenv-activate path))))
-  ;;   (let* ((pdir (projectile-project-root)))
-  ;;     (load-if-exists (concat pdir "/virtualenv"))
-  ;;     (load-if-exists (concat pdir "/venv"))))
-  ;; (add-hook 'python-mode-hook 'pyvenv-autoload)
-  ;; (defun pyvenv-switch ()
-  ;;   (if (eq major-mode 'python-mode)
-  ;;       (pyvenv-track-virtualenv)))
-  ;; (add-hook 'window-configuration-change-hook 'pyvenv-switch)
+  ;; ; automatic virtualenv loading; slow if you do it per buffer:
+  (setq-default pyvenv-tracking-mode nil)
 
   ; dash set for Python 3
-  (defun python-doc ()
+  (defun python-mode-settings ()
     (interactive)
-    (setq-local helm-dash-docsets '("Python 3")))
-  (add-hook 'python-mode-hook 'python-doc)
+    (setq-local helm-dash-docsets '("Python 3"))
+    (setq lsp-file-watch-ignored "$venv.*")
+    )
+  ;(require 'lsp-pyright)
+  (add-hook 'python-mode-hook 'python-mode-settings)
   (add-hook 'python-mode-hook 'python-docstring-mode)
+  (remove-hook 'python-mode-hook #'pyvenv-tracking-mode)
 
   ; imenu-list
   (setq imenu-list-position 'left)
@@ -700,7 +704,9 @@ before packages are loaded."
     '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
   ; make C-y passthrough in vterm; can still use C-c C-y to get from emacs
   (eval-after-load "vterm"
-    (define-key vterm-mode-map (kbd "C-y") 'vterm--self-insert))
+    '(define-key vterm-mode-map (kbd "C-y") 'vterm--self-insert))
+  (eval-after-load "vterm"
+    '(define-key vterm-mode-map (kbd "C-c C-y") 'vterm-yank-primary))
 
   ; org-brain
   (setq org-brain-path "~/Devel/slipbox/archive")
