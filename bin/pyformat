@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+"""
+Usage:
+
+$ echo hello | pyformat "line.upper()"
+HELLO
+"""
+
+import sys
+expr = sys.argv[1]
+
+for line in iter(sys.stdin.readline, ""):
+    line = line.rstrip("\n")
+    try:
+        sys.stdout.write("%s\n" % (eval(expr),))
+    except IOError:
+        break
