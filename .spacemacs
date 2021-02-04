@@ -707,7 +707,8 @@ before packages are loaded."
     '(define-key vterm-mode-map (kbd "C-y") 'vterm--self-insert))
   (eval-after-load "vterm"
     '(define-key vterm-mode-map (kbd "C-c C-y") 'vterm-yank-primary))
-
+  (eval-after-load "vterm"
+    '(define-key term-raw-map (kbd "C-c C-z") 'vterm-send-ctrl-z))
   ; org-brain
   (setq org-brain-path "~/Devel/slipbox/archive")
   (defun show-org-brain-visualize-keys ()
