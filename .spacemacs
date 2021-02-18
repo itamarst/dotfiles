@@ -117,6 +117,7 @@ This function should only modify configuration layer settings."
                                       nix-mode
                                       edit-indirect
                                       so-long
+                                      direnv
                                       )
 
    ;; A list of packages that cannot be updated.
@@ -715,6 +716,8 @@ before packages are loaded."
     (interactive)
     (which-key-show-keymap 'org-brain-visualize-mode-map))
   (spacemacs/set-leader-keys-for-major-mode 'org-brain-visualize-mode "?" 'show-org-brain-visualize-keys)
+
+  (direnv-mode)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
