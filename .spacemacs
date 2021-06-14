@@ -74,7 +74,7 @@ This function should only modify configuration layer settings."
      javascript
      yaml
      shell-scripts
-     (go :variables gofmt-command "goimports" go-tab-width nil)
+     (go :variables gofmt-command "goimports")
      c-c++
      html
      org
@@ -117,6 +117,7 @@ This function should only modify configuration layer settings."
                                       nix-mode
                                       edit-indirect
                                       so-long
+                                      cython-mode
                                       direnv
                                       )
 
@@ -687,7 +688,7 @@ before packages are loaded."
   (defun python-mode-settings ()
     (interactive)
     (setq-local helm-dash-docsets '("Python 3"))
-    (setq lsp-file-watch-ignored "$venv.*")
+    (setq lsp-file-watch-ignored nil)
     )
   ;(require 'lsp-pyright)
   (add-hook 'python-mode-hook 'python-mode-settings)
@@ -709,7 +710,9 @@ before packages are loaded."
   (eval-after-load "vterm"
     '(define-key vterm-mode-map (kbd "C-c C-y") 'vterm-yank-primary))
   (eval-after-load "vterm"
-    '(define-key term-raw-map (kbd "C-c C-z") 'vterm-send-ctrl-z))
+    '(define-key vterm-mode-map (kbd "C-c C-z") 'vterm-send-C-z))
+  (eval-after-load "vterm"
+    '(define-key vterm-mode-map (kbd "C-c C-c") 'vterm-send-C-c))
   ; org-brain
   (setq org-brain-path "~/Devel/slipbox/archive")
   (defun show-org-brain-visualize-keys ()
