@@ -575,6 +575,8 @@ before packages are loaded."
   ; keybinding for vc-ediff
   (global-set-key (kbd "M-m g d") 'vc-ediff)
 
+  ; dumb-jumping
+  (global-set-key (kbd "M-m j .") 'dumb-jump-go)
   ; keybinding for jumping back
   (global-set-key (kbd "M-m j DEL") 'pop-global-mark)
 
