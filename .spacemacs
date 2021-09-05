@@ -544,8 +544,9 @@ before packages are loaded."
   ;(ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
 
   ; Rust
-  (setq rust-format-on-save 't)
-  (setq lsp-ui-doc-enable nil)
+  (setq-default rust-format-on-save 't)
+  (setq-default lsp-ui-doc-enable nil)
+  (setq-default lsp-rust-analyzer-cargo-watch-command "clippy")
 
   ; Search documentation
   (global-set-key (kbd "C-c s") 'helm-dash)
