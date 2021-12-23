@@ -114,8 +114,6 @@ This function should only modify configuration layer settings."
                                       editorconfig
                                       graphviz-dot-mode
                                       separedit
-                                      nix-mode
-                                      edit-indirect
                                       so-long
                                       cython-mode
                                       direnv
