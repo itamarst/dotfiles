@@ -543,10 +543,65 @@ before packages are loaded."
   ; nicer buffer switching
   ;(ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
 
+
+  (define-key prog-mode-map        (kbd "C-c '") #'separedit)
+  (define-key minibuffer-local-map (kbd "C-c '") #'separedit)
+  (define-key help-mode-map        (kbd "C-c '") #'separedit)
+  (define-key helpful-mode-map     (kbd "C-c '") #'separedit)
+
+  ;; Default major-mode for edit buffer
+  ;; can also be other mode e.g. ‘org-mode’.
+  (setq separedit-default-mode 'markdown-mode)
+
   ; Rust
   (setq-default rust-format-on-save 't)
   (setq-default lsp-ui-doc-enable nil)
   (setq-default lsp-rust-analyzer-cargo-watch-command "clippy")
+  (setq-default lsp-rust-analyzer-cargo-watch-args ["--no-deps"])
+  (define-key rust-mode-map (kbd "M-RET h b") 'lsp-rust-analyzer-open-external-docs)
+  (define-key rust-mode-map (kbd "M-m m h b") 'lsp-rust-analyzer-open-external-docs)
+
+  ;; Support parsing compile errors (https://github.com/rust-lang/rust/issues/6887)
+  (defvar rustc-compilation-regexps
+      (let ((file "\\([^\n]+\\)")
+            (start-line "\\([0-9]+\\)")
+            (start-col  "\\([0-9]+\\)")
+            (end-line   "\\([0-9]+\\)")
+            (end-col    "\\([0-9]+\\)")
+            (msg-type   "\\(?:[Ee]rror\\|\\([Ww]arning\\)\\|\\([Nn]ote\\|[Hh]elp\\)\\)"))
+        (let ((re (concat "^" file ":" start-line ":" start-col
+                          ": " end-line ":" end-col
+                          " " msg-type ":")))
+          (cons re '(1 (2 . 4) (3 . 5) (6 . 7)))))
+      "Specifications for matching errors in rustc invocations.
+    See `compilation-error-regexp-alist' for help on their format.")
+  (defvar rustc-new-compilation-regexps
+      (let ((file "\\([^\n]+\\)")
+            (start-line "\\([0-9]+\\)")
+            (start-col  "\\([0-9]+\\)"))
+        (let ((re (concat "^ *--> " file ":" start-line ":" start-col ; --> 1:2:3
+                          )))
+          (cons re '(1 2 3))))
+      "Specifications for matching errors in rustc invocations (new style).
+    See `compilation-error-regexp-alist' for help on their format.")
+  ;; Match test run failures and panics during compilation as
+  ;; compilation warnings
+  (defvar cargo-compilation-regexps
+      '("^\\s-+thread '[^']+' panicked at \\('[^']+', \\([^:]+\\):\\([0-9]+\\)\\)" 2 3 nil nil 1)
+      "Specifications for matching panics in cargo test invocations.
+    See `compilation-error-regexp-alist' for help on their format.")
+
+    (eval-after-load 'compile
+      '(progn
+         (add-to-list 'compilation-error-regexp-alist-alist
+                      (cons 'rustc-new rustc-new-compilation-regexps))
+         (add-to-list 'compilation-error-regexp-alist 'rustc-new)
+         (add-to-list 'compilation-error-regexp-alist-alist
+                      (cons 'rustc rustc-compilation-regexps))
+         (add-to-list 'compilation-error-regexp-alist 'rustc)
+         (add-to-list 'compilation-error-regexp-alist-alist
+                      (cons 'cargo cargo-compilation-regexps))
+         (add-to-list 'compilation-error-regexp-alist 'cargo)))
 
   ; Search documentation
   (global-set-key (kbd "C-c s") 'helm-dash)
