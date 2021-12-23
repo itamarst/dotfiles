@@ -622,7 +622,7 @@ before packages are loaded."
   (setq-default magit-diff-refine-hunk 't)
 
   ; Store git references to work-in-progress code:
-  ;(magit-wip-mode)
+  (magit-wip-mode)
   ;(magit-define-popup-action 'magit-file-popup
   ;  ?R "Rename file" 'magit-file-rename)
   ;(magit-define-popup-action 'magit-file-popup
