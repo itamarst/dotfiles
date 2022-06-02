@@ -123,7 +123,7 @@ This function should only modify configuration layer settings."
    dotspacemacs-frozen-packages '()
 
    ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages '(smartparens rainbow-delimiters)
+   dotspacemacs-excluded-packages '(rainbow-delimiters)
 
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
@@ -545,7 +545,6 @@ before packages are loaded."
   (define-key prog-mode-map        (kbd "C-c '") #'separedit)
   (define-key minibuffer-local-map (kbd "C-c '") #'separedit)
   (define-key help-mode-map        (kbd "C-c '") #'separedit)
-  (define-key helpful-mode-map     (kbd "C-c '") #'separedit)
 
   ;; Default major-mode for edit buffer
   ;; can also be other mode e.g. ‘org-mode’.
@@ -553,11 +552,13 @@ before packages are loaded."
 
   ; Rust
   (setq-default rust-format-on-save 't)
-  (setq-default lsp-ui-doc-enable nil)
+  ;(setq-default lsp-ui-doc-enable nil)
   (setq-default lsp-rust-analyzer-cargo-watch-command "clippy")
   (setq-default lsp-rust-analyzer-cargo-watch-args ["--no-deps"])
+  (require 'rust-mode)
   (define-key rust-mode-map (kbd "M-RET h b") 'lsp-rust-analyzer-open-external-docs)
   (define-key rust-mode-map (kbd "M-m m h b") 'lsp-rust-analyzer-open-external-docs)
+  (setq lsp-lens-enable 't)
 
   ;; Support parsing compile errors (https://github.com/rust-lang/rust/issues/6887)
   (defvar rustc-compilation-regexps
@@ -763,10 +764,13 @@ before packages are loaded."
   ; make C-y passthrough in vterm; can still use C-c C-y to get from emacs
   (eval-after-load "vterm"
     '(define-key vterm-mode-map (kbd "C-y") 'vterm--self-insert))
+  ; paste from normal emacs copy/paste
   (eval-after-load "vterm"
     '(define-key vterm-mode-map (kbd "C-c C-y") 'vterm-yank-primary))
+  ; C-z in terminal
   (eval-after-load "vterm"
     '(define-key vterm-mode-map (kbd "C-c C-z") 'vterm-send-C-z))
+  ; C-c in terminal
   (eval-after-load "vterm"
     '(define-key vterm-mode-map (kbd "C-c C-c") 'vterm-send-C-c))
   ; org-brain
