@@ -94,18 +94,14 @@ This function should only modify configuration layer settings."
    ;; '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
    dotspacemacs-additional-packages '(
-                                      mmm-mode
                                       switch-window
                                       helm-dash
-                                      flycheck-vale
                                       outline-magic
                                       remark-mode
                                       dictionary
                                       discover-my-major
-                                      sudo-ext
                                       pandoc-mode
                                       beginend
-                                      visual-regexp-steroids
                                       python-docstring
                                       python-pytest
                                       traad
@@ -117,6 +113,7 @@ This function should only modify configuration layer settings."
                                       so-long
                                       cython-mode
                                       direnv
+                                      just-mode
                                       )
 
    ;; A list of packages that cannot be updated.
@@ -551,6 +548,7 @@ before packages are loaded."
   (setq separedit-default-mode 'markdown-mode)
 
   ; Rust
+  ; TODO https://veykril.github.io/posts/semantic-unsafe/
   (setq-default rust-format-on-save 't)
   ;(setq-default lsp-ui-doc-enable nil)
   (setq-default lsp-rust-analyzer-cargo-watch-command "clippy")
@@ -701,11 +699,6 @@ before packages are loaded."
 
   ; Visual line mode for text:
   (add-hook 'text-mode-hook 'visual-line-mode)
-
-  ; style check
-  (flycheck-vale-setup)
-  (add-hook 'markdown-mode-hook 'flycheck-mode)
-  (add-hook 'rst-mode-hook 'flycheck-mode)
 
   ; Jekyll
   (defun jekyll-insert-post-url ()
