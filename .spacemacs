@@ -65,7 +65,7 @@ This function should only modify configuration layer settings."
                       version-control-diff-side 'left)
      (python :variables
              python-formatter 'black
-             python-backend 'anaconda
+             python-backend 'lsp
              python-test-runner 'pytest
              pyvenv-tracking-mode nil
              ;auto-set-local-pyvenv-virtualenv nil
@@ -76,7 +76,7 @@ This function should only modify configuration layer settings."
      shell-scripts
      (go :variables gofmt-command "goimports")
      c-c++
-     html
+     (html :variables html-enable-lsp nil)
      org
      docker
      deft
@@ -556,7 +556,10 @@ before packages are loaded."
   (require 'rust-mode)
   (define-key rust-mode-map (kbd "M-RET h b") 'lsp-rust-analyzer-open-external-docs)
   (define-key rust-mode-map (kbd "M-m m h b") 'lsp-rust-analyzer-open-external-docs)
-  (setq lsp-lens-enable 't)
+  (setq-default lsp-lens-enable 't)
+  ;(setq-default lsp-enable-semantic-highlighting 't)
+  ;(setq-default lsp-semantic-tokens-enable 't)
+  ;(add-to-list 'lsp-semantic-token-modifier-faces '("unsafe" . rust-unsafe-face))
 
   ;; Support parsing compile errors (https://github.com/rust-lang/rust/issues/6887)
   (defvar rustc-compilation-regexps
@@ -735,6 +738,8 @@ before packages are loaded."
   (setq-default pyvenv-tracking-mode nil)
 
   ; dash set for Python 3
+  (setq-default helm-dash-docsets-path (expand-file-name "~/docsets"))
+  (setq-default dash-docs-docsets-path (expand-file-name "~/docsets"))
   (defun python-mode-settings ()
     (interactive)
     (setq-local helm-dash-docsets '("Python 3"))
