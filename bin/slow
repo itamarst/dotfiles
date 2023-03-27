@@ -1,0 +1,5 @@
+#!/bin/bash
+set -euo pipefail
+PERCENTAGE="$1"
+shift
+systemd-run --uid=$USER --gid=$USER --scope --property CPUQuota="${PERCENTAGE}%" -- "$@"
