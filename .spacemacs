@@ -44,9 +44,9 @@ This function should only modify configuration layer settings."
      emacs-lisp
      git
      helm
-     ;; lsp
+     lsp
      markdown
-     (rust :variables rust-backend 'lsp lsp-rust-server 'rust-analyzer)
+     rust
      ;; multiple-cursors
      ;; org
      ;; (shell :variables
@@ -84,6 +84,8 @@ This function should only modify configuration layer settings."
      lsp
      ipython-notebook
      spacemacs-purpose
+     (languagetool :variables
+                   langtool-language-tool-jar "/snap/languagetool/current/usr/bin/languagetool-commandline.jar")
      )
 
    ;; List of additional packages that will be installed without being
@@ -114,6 +116,7 @@ This function should only modify configuration layer settings."
                                       cython-mode
                                       direnv
                                       just-mode
+                                      quarto-mode
                                       )
 
    ;; A list of packages that cannot be updated.
@@ -849,6 +852,8 @@ before packages are loaded."
   (spacemacs/set-leader-keys-for-major-mode 'org-brain-visualize-mode "?" 'show-org-brain-visualize-keys)
 
   (direnv-mode)
+
+  (require 'quarto-mode)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -871,5 +876,5 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(highlight-parentheses-highlight ((nil (:weight ultra-bold))) t))
 )
