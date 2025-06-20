@@ -507,6 +507,13 @@ It should only modify the values of Spacemacs settings."
    ;; (default '("rg" "ag" "pt" "ack" "grep"))
    dotspacemacs-search-tools '("rg" "ag" "pt" "ack" "grep")
 
+   ;; The backend used for undo/redo functionality. Possible values are
+   ;; `undo-fu', `undo-redo' and `undo-tree' see also `evil-undo-system'.
+   ;; Note that saved undo history does not get transferred when changing
+   ;; your undo system. The default is currently `undo-fu' as `undo-tree'
+   ;; is not maintained anymore and `undo-redo' is very basic."
+   dotspacemacs-undo-system 'undo-fu
+
    ;; Format specification for setting the frame title.
    ;; %a - the `abbreviated-file-name', or `buffer-name'
    ;; %t - `projectile-project-name'
@@ -634,6 +641,20 @@ before packages are loaded."
   ;(setq-default lsp-semantic-tokens-enable 't)
   ;(add-to-list 'lsp-semantic-token-modifier-faces '("unsafe" . rust-unsafe-face))
 
+  (setq rustic-format-trigger 'on-save)
+                                        ;(setq lsp-ui-doc-enable nil)
+  (setq-default lsp-rust-analyzer-cargo-auto-reload nil)
+  (setq-default lsp-rust-analyzer-cargo-extra-env ["CARGO_TARGET_DIR" "target/analyzer"])
+  (setq-default lsp-rust-analyzer-cargo-watch-args ["--target-dir=target/analyzer"])
+                                        ;(setq-default lsp-rust-analyzer-cargo-override-command ["cargo" "check" "--message=format=json" "--target-dir=target/analyzer"])
+                                        ;(require 'rust-mode)
+                                        ;(define-key rust-mode-map (kbd "M-RET h b") 'lsp-rust-analyzer-open-external-docs)
+                                        ;(define-key rust-mode-map (kbd "M-m m h b") 'lsp-rust-analyzer-open-external-docs)
+  (setq lsp-lens-enable 't)
+                                        ;(setq lsp-enable-semantic-highlighting 't)
+                                        ;(setq lsp-semantic-tokens-enable 't)
+                                        ;(add-to-list 'lsp-semantic-token-modifier-faces '("unsafe" . rust-unsafe-face))
+  (setq lsp-idle-delay 0.500)
   ;; Support parsing compile errors (https://github.com/rust-lang/rust/issues/6887)
   (defvar rustc-compilation-regexps
       (let ((file "\\([^\n]+\\)")
@@ -854,6 +875,11 @@ before packages are loaded."
   (direnv-mode)
 
   (require 'quarto-mode)
+  (require 'lsp-mode)
+  (lsp-register-client (make-lsp-client
+                         :new-connection (lsp-stdio-connection '("vale.vale-ls"))
+                         :activation-fn (lsp-activate-on "markdown")
+                         :server-id 'vale))
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
