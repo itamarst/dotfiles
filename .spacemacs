@@ -32,7 +32,12 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(windows-scripts
+   '(nginx
+     asciidoc
+     lua
+     (sql :variables sql-backend 'lsp)
+     csv
+     windows-scripts
      ruby
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
@@ -47,6 +52,7 @@ This function should only modify configuration layer settings."
      lsp
      markdown
      rust
+     ess
      ;; multiple-cursors
      ;; org
      ;; (shell :variables
@@ -64,14 +70,15 @@ This function should only modify configuration layer settings."
                       version-control-diff-tool 'diff-hl
                       version-control-diff-side 'left)
      (python :variables
-             python-formatter 'black
+             python-formatter 'ruff
              python-backend 'lsp
              python-test-runner 'pytest
              pyvenv-tracking-mode nil
-             ;auto-set-local-pyvenv-virtualenv nil
-             ;python-auto-set-local-pyenv-version nil
+                                        ;auto-set-local-pyvenv-virtualenv nil
+                                        ;python-auto-set-local-pyenv-version nil
              )
      javascript
+     typescript
      yaml
      shell-scripts
      (go :variables gofmt-command "goimports")
@@ -81,11 +88,14 @@ This function should only modify configuration layer settings."
      docker
      deft
      dap
-     lsp
      ipython-notebook
      spacemacs-purpose
+     dash
+     nixos
      (languagetool :variables
-                   langtool-language-tool-jar "/snap/languagetool/current/usr/bin/languagetool-commandline.jar")
+                   langtool-language-tool-jar "/snap/languagetool/current/usr/bin/languagetool-commandline.jar"
+
+                   langtool-default-language "en-US")
      )
 
    ;; List of additional packages that will be installed without being
@@ -106,7 +116,8 @@ This function should only modify configuration layer settings."
                                       beginend
                                       python-docstring
                                       python-pytest
-                                      traad
+                                      lsp-pyright
+                                      traadpa
                                       writeroom-mode
                                       blacken
                                       editorconfig
@@ -116,7 +127,10 @@ This function should only modify configuration layer settings."
                                       cython-mode
                                       direnv
                                       just-mode
+                                      nix-update
                                       quarto-mode
+                                      vundo
+                                      lsp-ltex-plus
                                       )
 
    ;; A list of packages that cannot be updated.
@@ -297,9 +311,10 @@ It should only modify the values of Spacemacs settings."
    ;; Default font or prioritized list of fonts. The `:size' can be specified as
    ;; a non-negative integer (pixel size), or a floating-point (point size).
    ;; Point size is recommended, because it's device independent. (default 10.0)
-   dotspacemacs-default-font '("Source Code Pro"
+   dotspacemacs-default-font '("Atkinson Hyperlegible Mono"
                                :weight normal
                                :width normal
+                               :size 18
                                :powerline-scale 1.1
                                )
 
@@ -505,7 +520,7 @@ It should only modify the values of Spacemacs settings."
    ;; List of search tool executable names. Spacemacs uses the first installed
    ;; tool of the list. Supported tools are `rg', `ag', `pt', `ack' and `grep'.
    ;; (default '("rg" "ag" "pt" "ack" "grep"))
-   dotspacemacs-search-tools '("rg" "ag" "pt" "ack" "grep")
+   dotspacemacs-search-tools '("rg" "ag" "ack" "grep")
 
    ;; The backend used for undo/redo functionality. Possible values are
    ;; `undo-fu', `undo-redo' and `undo-tree' see also `evil-undo-system'.
@@ -575,7 +590,7 @@ default it calls `spacemacs/load-spacemacs-env' which loads the environment
 variables declared in `~/.spacemacs.env' or `~/.spacemacs.d/.spacemacs.env'.
 See the header of this file for more information."
   (spacemacs/load-spacemacs-env)
-)
+  )
 
 (defun dotspacemacs/user-init ()
   "Initialization for user code:
@@ -592,6 +607,101 @@ This function is called only while dumping Spacemacs configuration. You can
 dump."
   )
 
+                                        ; difftastic integration from https://tsdh.org/posts/2022-08-01-difftastic-diffing-with-magit.html
+(defun th/magit--with-difftastic (buffer command)
+  "Run COMMAND with GIT_EXTERNAL_DIFF=difft then show result in BUFFER."
+  (let ((process-environment
+         (cons (concat "GIT_EXTERNAL_DIFF=difft --width="
+                       (number-to-string (frame-width)))
+               process-environment)))
+    ;; Clear the result buffer (we might regenerate a diff, e.g., for
+    ;; the current changes in our working directory).
+    (with-current-buffer buffer
+      (setq buffer-read-only nil)
+      (erase-buffer))
+    ;; Now spawn a process calling the git COMMAND.
+    (make-process
+     :name (buffer-name buffer)
+     :buffer buffer
+     :command command
+     ;; Don't query for running processes when emacs is quit.
+     :noquery t
+     ;; Show the result buffer once the process has finished.
+     :sentinel (lambda (proc event)
+                 (when (eq (process-status proc) 'exit)
+                   (with-current-buffer (process-buffer proc)
+                     (goto-char (point-min))
+                     (ansi-color-apply-on-region (point-min) (point-max))
+                     (setq buffer-read-only t)
+                     (view-mode)
+                     (end-of-line)
+                     ;; difftastic diffs are usually 2-column side-by-side,
+                     ;; so ensure our window is wide enough.
+                     (let ((width (current-column)))
+                       (while (zerop (forward-line 1))
+                         (end-of-line)
+                         (setq width (max (current-column) width)))
+                       ;; Add column size of fringes
+                       (setq width (+ width
+                                      (fringe-columns 'left)
+                                      (fringe-columns 'right)))
+                       (goto-char (point-min))
+                       (pop-to-buffer
+                        (current-buffer)
+                        `(;; If the buffer is that wide that splitting the frame in
+                          ;; two side-by-side windows would result in less than
+                          ;; 80 columns left, ensure it's shown at the bottom.
+                          ,(when (> 80 (- (frame-width) width))
+                             #'display-buffer-at-bottom)
+                          (window-width
+                           . ,(min width (frame-width))))))))))))
+
+(defun th/magit-show-with-difftastic (rev)
+  "Show the result of \"git show REV\" with GIT_EXTERNAL_DIFF=difft."
+  (interactive
+   (list (or
+          ;; If REV is given, just use it.
+          (when (boundp 'rev) rev)
+          ;; If not invoked with prefix arg, try to guess the REV from
+          ;; point's position.
+          (and (not current-prefix-arg)
+               (or (magit-thing-at-point 'git-revision t)
+                   (magit-branch-or-commit-at-point)))
+          ;; Otherwise, query the user.
+          (magit-read-branch-or-commit "Revision"))))
+  (if (not rev)
+      (error "No revision specified")
+    (th/magit--with-difftastic
+     (get-buffer-create (concat "*git show difftastic " rev "*"))
+     (list "git" "--no-pager" "show" "--ext-diff" rev))))
+
+(defun th/magit-diff-with-difftastic (arg)
+  "Show the result of \"git diff ARG\" with GIT_EXTERNAL_DIFF=difft."
+  (interactive
+   (list (or
+          ;; If RANGE is given, just use it.
+          (when (boundp 'range) range)
+          ;; If prefix arg is given, query the user.
+          (and current-prefix-arg
+               (magit-diff-read-range-or-commit "Range"))
+          ;; Otherwise, auto-guess based on position of point, e.g., based on
+          ;; if we are in the Staged or Unstaged section.
+          (pcase (magit-diff--dwim)
+            ('unmerged (error "unmerged is not yet implemented"))
+            ('unstaged nil)
+            ('staged "--cached")
+            (`(stash . ,value) (error "stash is not yet implemented"))
+            (`(commit . ,value) (format "%s^..%s" value value))
+            ((and range (pred stringp)) range)
+            (_ (magit-diff-read-range-or-commit "Range/Commit"))))))
+  (let ((name (concat "*git diff difftastic"
+                      (if arg (concat " " arg) "")
+                      "*")))
+    (th/magit--with-difftastic
+     (get-buffer-create name)
+     `("git" "--no-pager" "diff" "--ext-diff" ,@(when arg (list arg))))))
+
+
 (defun dotspacemacs/user-config ()
   "Configuration for user code:
 This function is called at the very end of Spacemacs startup, after layer
@@ -602,7 +712,7 @@ before packages are loaded."
   (server-start)
   (setq-default line-spacing 2)
 
-  ; highlight matching parenthesis:
+                                        ; highlight matching parenthesis:
   (setq show-paren-delay 0)
   (show-paren-mode 1)
 
@@ -612,11 +722,11 @@ before packages are loaded."
   ;; After switching projects in projectile by default we want magit-status
   (setq projectile-switch-project-action 'magit-status)
 
-  ; enable switch-window
+                                        ; enable switch-window
   (global-set-key (kbd "C-x o") 'switch-window)
 
-  ; nicer buffer switching
-  ;(ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
+                                        ; nicer buffer switching
+                                        ;(ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
 
 
   (define-key prog-mode-map        (kbd "C-c '") #'separedit)
@@ -627,24 +737,18 @@ before packages are loaded."
   ;; can also be other mode e.g. ‘org-mode’.
   (setq separedit-default-mode 'markdown-mode)
 
-  ; Rust
-  ; TODO https://veykril.github.io/posts/semantic-unsafe/
-  (setq-default rust-format-on-save 't)
-  ;(setq-default lsp-ui-doc-enable nil)
-  (setq-default lsp-rust-analyzer-cargo-watch-command "clippy")
-  (setq-default lsp-rust-analyzer-cargo-watch-args ["--no-deps"])
-  (require 'rust-mode)
-  (define-key rust-mode-map (kbd "M-RET h b") 'lsp-rust-analyzer-open-external-docs)
-  (define-key rust-mode-map (kbd "M-m m h b") 'lsp-rust-analyzer-open-external-docs)
-  (setq-default lsp-lens-enable 't)
-  ;(setq-default lsp-enable-semantic-highlighting 't)
-  ;(setq-default lsp-semantic-tokens-enable 't)
-  ;(add-to-list 'lsp-semantic-token-modifier-faces '("unsafe" . rust-unsafe-face))
-
-  (setq rustic-format-trigger 'on-save)
+                                        ; Rust
+                                        ; TODO https://veykril.github.io/posts/semantic-unsafe/
+  (setq rust-format-on-save 't)
+                                        ;(setq rustic-format-on-save 't)
+                                        ;(setq rustic-format-on-save-method 'rustic-cargo-fmt)
                                         ;(setq lsp-ui-doc-enable nil)
+                                        ;(setq-default lsp-rust-analyzer-cargo-watch-command "check")
+  (setq lsp-enable-file-watchers nil)
+  (setq-default lsp-format-buffer-on-save 't)
+  (setq-default lsp-format-buffer-on-save-list '(rustic-mode))
   (setq-default lsp-rust-analyzer-cargo-auto-reload nil)
-  (setq-default lsp-rust-analyzer-cargo-extra-env ["CARGO_TARGET_DIR" "target/analyzer"])
+  (setq-default lsp-rust-analyzer-cargo-extra-env #s(hash-table data ("CARGO_TARGET_DIR" "target/analyzer")))
   (setq-default lsp-rust-analyzer-cargo-watch-args ["--target-dir=target/analyzer"])
                                         ;(setq-default lsp-rust-analyzer-cargo-override-command ["cargo" "check" "--message=format=json" "--target-dir=target/analyzer"])
                                         ;(require 'rust-mode)
@@ -657,108 +761,119 @@ before packages are loaded."
   (setq lsp-idle-delay 0.500)
   ;; Support parsing compile errors (https://github.com/rust-lang/rust/issues/6887)
   (defvar rustc-compilation-regexps
-      (let ((file "\\([^\n]+\\)")
-            (start-line "\\([0-9]+\\)")
-            (start-col  "\\([0-9]+\\)")
-            (end-line   "\\([0-9]+\\)")
-            (end-col    "\\([0-9]+\\)")
-            (msg-type   "\\(?:[Ee]rror\\|\\([Ww]arning\\)\\|\\([Nn]ote\\|[Hh]elp\\)\\)"))
-        (let ((re (concat "^" file ":" start-line ":" start-col
-                          ": " end-line ":" end-col
-                          " " msg-type ":")))
-          (cons re '(1 (2 . 4) (3 . 5) (6 . 7)))))
-      "Specifications for matching errors in rustc invocations.
+    (let ((file "\\([^\n]+\\)")
+          (start-line "\\([0-9]+\\)")
+          (start-col  "\\([0-9]+\\)")
+          (end-line   "\\([0-9]+\\)")
+          (end-col    "\\([0-9]+\\)")
+          (msg-type   "\\(?:[Ee]rror\\|\\([Ww]arning\\)\\|\\([Nn]ote\\|[Hh]elp\\)\\)"))
+      (let ((re (concat "^" file ":" start-line ":" start-col
+                        ": " end-line ":" end-col
+                        " " msg-type ":")))
+        (cons re '(1 (2 . 4) (3 . 5) (6 . 7)))))
+    "Specifications for matching errors in rustc invocations.
     See `compilation-error-regexp-alist' for help on their format.")
   (defvar rustc-new-compilation-regexps
-      (let ((file "\\([^\n]+\\)")
-            (start-line "\\([0-9]+\\)")
-            (start-col  "\\([0-9]+\\)"))
-        (let ((re (concat "^ *--> " file ":" start-line ":" start-col ; --> 1:2:3
-                          )))
-          (cons re '(1 2 3))))
-      "Specifications for matching errors in rustc invocations (new style).
+    (let ((file "\\([^\n]+\\)")
+          (start-line "\\([0-9]+\\)")
+          (start-col  "\\([0-9]+\\)"))
+      (let ((re (concat "^ *--> " file ":" start-line ":" start-col ; --> 1:2:3
+                        )))
+        (cons re '(1 2 3))))
+    "Specifications for matching errors in rustc invocations (new style).
     See `compilation-error-regexp-alist' for help on their format.")
   ;; Match test run failures and panics during compilation as
   ;; compilation warnings
   (defvar cargo-compilation-regexps
-      '("^\\s-+thread '[^']+' panicked at \\('[^']+', \\([^:]+\\):\\([0-9]+\\)\\)" 2 3 nil nil 1)
-      "Specifications for matching panics in cargo test invocations.
+    '("^\\s-+thread '[^']+' panicked at \\('[^']+', \\([^:]+\\):\\([0-9]+\\)\\)" 2 3 nil nil 1)
+    "Specifications for matching panics in cargo test invocations.
     See `compilation-error-regexp-alist' for help on their format.")
 
-    (eval-after-load 'compile
-      '(progn
-         (add-to-list 'compilation-error-regexp-alist-alist
-                      (cons 'rustc-new rustc-new-compilation-regexps))
-         (add-to-list 'compilation-error-regexp-alist 'rustc-new)
-         (add-to-list 'compilation-error-regexp-alist-alist
-                      (cons 'rustc rustc-compilation-regexps))
-         (add-to-list 'compilation-error-regexp-alist 'rustc)
-         (add-to-list 'compilation-error-regexp-alist-alist
-                      (cons 'cargo cargo-compilation-regexps))
-         (add-to-list 'compilation-error-regexp-alist 'cargo)))
+  (eval-after-load 'compile
+    '(progn
+       (add-to-list 'compilation-error-regexp-alist-alist
+                    (cons 'rustc-new rustc-new-compilation-regexps))
+       (add-to-list 'compilation-error-regexp-alist 'rustc-new)
+       (add-to-list 'compilation-error-regexp-alist-alist
+                    (cons 'rustc rustc-compilation-regexps))
+       (add-to-list 'compilation-error-regexp-alist 'rustc)
+       (add-to-list 'compilation-error-regexp-alist-alist
+                    (cons 'cargo cargo-compilation-regexps))
+       (add-to-list 'compilation-error-regexp-alist 'cargo)))
 
-  ; Search documentation
+                                        ; Search documentation
   (global-set-key (kbd "C-c s") 'helm-dash)
 
-  ; outline cycling for outline-minor-mode
+                                        ; outline cycling for outline-minor-mode
   (add-hook 'prog-mode-hook 'outline-minor-mode)
   (add-hook 'yaml-mode-hook 'outline-minor-mode)
-  (define-key outline-minor-mode-map (kbd "<C-tab>") 'outline-cycle)
+  ;; (define-key outline-minor-mode-map (kbd "<C-tab>") 'outline-cycle)
 
-  ; Highlight indentation:
+                                        ; Highlight indentation:
   (add-hook 'prog-mode-hook 'highlight-indentation-mode)
   (add-hook 'yaml-mode-hook (lambda ()
                               (highlight-indentation-mode)
                               (highlight-indentation-set-offset 2)))
 
-  ; character level diffs
+                                        ; character level diffs
   (setq-default ediff-forward-word-function 'forward-char)
   (setq-default magit-diff-refine-hunk 't)
 
-  ; Store git references to work-in-progress code:
-  (magit-wip-mode)
-  ;(magit-define-popup-action 'magit-file-popup
-  ;  ?R "Rename file" 'magit-file-rename)
-  ;(magit-define-popup-action 'magit-file-popup
-  ;  ?K "Delete file" 'magit-file-delete)
+                                        ; difftastic for magit
+  ;; (transient-define-prefix th/magit-aux-commands ()
+  ;;   "My personal auxiliary magit commands."
+  ;;   ["Auxiliary commands"
+  ;;    ("d" "Difftastic Diff (dwim)" th/magit-diff-with-difftastic)
+  ;;    ("s" "Difftastic Show" th/magit-show-with-difftastic)])
+  ;; (transient-append-suffix 'magit-dispatch "!"
+  ;;   '("#" "My Magit Cmds" th/magit-aux-commands))
+  ;; (define-key magit-status-mode-map (kbd "#") #'th/magit-aux-commands)
 
-  ; keybinding for vc-ediff
+
+                                        ; Store git references to work-in-progress code:
+  (magit-wip-mode)
+                                        ;(magit-define-popup-action 'magit-file-popup
+                                        ;  ?R "Rename file" 'magit-file-rename)
+                                        ;(magit-define-popup-action 'magit-file-popup
+                                        ;  ?K "Delete file" 'magit-file-delete)
+
+                                        ; keybinding for vc-ediff
   (global-set-key (kbd "M-m g d") 'vc-ediff)
 
-  ; dumb-jumping
+                                        ; dumb-jumping
   (global-set-key (kbd "M-m j .") 'dumb-jump-go)
-  ; keybinding for jumping back
+                                        ; keybinding for jumping back
   (global-set-key (kbd "M-m j DEL") 'pop-global-mark)
 
-  ; I hate changelog mode
+                                        ; I hate changelog mode
   (delete '("[cC]hange\\.?[lL]og?\\'" . change-log-mode) auto-mode-alist)
   (delete '("[cC]hange[lL]og[-.][0-9]+\\'" . change-log-mode) auto-mode-alist)
   (delete '("\\$CHANGE_LOG\\$\\.TXT" . change-log-mode) auto-mode-alist)
   (delete '("[cC]hange[lL]og[-.][-0-9a-z]+\\'" . change-log-mode) auto-mode-alist)
 
-  ; no background for comments
+                                        ; no background for comments
   (setq spacemacs-theme-comment-bg nil)
 
-  ; mode-specific help
+                                        ; mode-specific help
   (global-set-key (kbd "C-h C-m") 'discover-my-major)
   (global-set-key (kbd "C-h M-m") 'discover-my-mode)
 
-  ; faster long lines?
+                                        ; faster long lines?
   (setq-default bidi-paragraph-direction 'left-to-right)
   (if (version<= "27.1" emacs-version)
       (setq bidi-inhibit-bpa t))
   (global-so-long-mode 1)
 
-  ; speedbar on left
+                                        ; speedbar on left
   (setq sr-speedbar-right-side nil)
 
-  ; M-< and M-> with better defaults
+                                        ; M-< and M-> with better defaults
   (beginend-global-mode)
 
-  ; hide spaceline minor modes
+                                        ; hide spaceline minor modes
   (setq spaceline-minor-modes-p nil)
 
-  ; writing mode
+                                        ; writing mode
   (defun writemode-on ()
     (interactive)
     (spacemacs/toggle-line-numbers-off)
@@ -772,32 +887,32 @@ before packages are loaded."
     (writeroom-mode 0))
 
 
-  ;(add-hook 'java-mode-hook
-  ;          (lambda ()
-  ;            ;; meghanada-mode on
-  ;            (meghanada-mode t)
-  ;            ;; enable telemetry
-  ;            (meghanada-telemetry-enable t)
-  ;            (flycheck-mode +1)
-  ;            (setq c-basic-offset 2)
-  ;            ;; use code format
-  ;            (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
-  ;(add-hook 'java-mode-hook
-  ;          (lambda () (flycheck-mode t)))
-  ;(add-hook 'java-mode-hook (lambda ()
-  ;                            (setq c-basic-offset 2)))
+                                        ;(add-hook 'java-mode-hook
+                                        ;          (lambda ()
+                                        ;            ;; meghanada-mode on
+                                        ;            (meghanada-mode t)
+                                        ;            ;; enable telemetry
+                                        ;            (meghanada-telemetry-enable t)
+                                        ;            (flycheck-mode +1)
+                                        ;            (setq c-basic-offset 2)
+                                        ;            ;; use code format
+                                        ;            (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
+                                        ;(add-hook 'java-mode-hook
+                                        ;          (lambda () (flycheck-mode t)))
+                                        ;(add-hook 'java-mode-hook (lambda ()
+                                        ;                            (setq c-basic-offset 2)))
   ;;; TEXT ;;;
 
-  ; Enable spell-checking in text modes (but not YAML):
+                                        ; Enable spell-checking in text modes (but not YAML):
   (dolist (hook '(text-mode-hook))
     (add-hook hook (lambda () (flyspell-mode 1))))
   (dolist (hook '(yaml-mode-hook))
     (add-hook hook (lambda () (flyspell-mode -1))))
 
-  ; Visual line mode for text:
+                                        ; Visual line mode for text:
   (add-hook 'text-mode-hook 'visual-line-mode)
 
-  ; Jekyll
+                                        ; Jekyll
   (defun jekyll-insert-post-url ()
     (interactive)
     (let* ((files (remove "." (mapcar #'file-name-sans-extension (directory-files "."))))
@@ -808,19 +923,19 @@ before packages are loaded."
   (eval-after-load "markdown"
     '(define-key markdown-mode-map (kbd "C-c '") 'markdown-edit-code-block))
 
-  ; better dictionary
+                                        ; better dictionary
   (global-set-key (kbd "M-m x w d") 'dictionary-lookup-definition)
 
-  ; mmm-mode for markdown (use C-C ' instead)
-  ;(markdown/init-mmm-mode)
-  ;(setq mmm-global-mode nil)
-  ;(mmm-add-classes '((markdown-yaml
-  ;                    :submode yaml-mode
-  ;                    :face mmm-declaration-submode-face
-  ;                    :front "^```yaml[\n\r]+"
-  ;                    :back "^```$")))
-  ;(mmm-add-mode-ext-class 'markdown-mode nil 'markdown-yaml)
-  ;(setq mmm-parse-when-idle 't)
+                                        ; mmm-mode for markdown (use C-C ' instead)
+                                        ;(markdown/init-mmm-mode)
+                                        ;(setq mmm-global-mode nil)
+                                        ;(mmm-add-classes '((markdown-yaml
+                                        ;                    :submode yaml-mode
+                                        ;                    :face mmm-declaration-submode-face
+                                        ;                    :front "^```yaml[\n\r]+"
+                                        ;                    :back "^```$")))
+                                        ;(mmm-add-mode-ext-class 'markdown-mode nil 'markdown-yaml)
+                                        ;(setq mmm-parse-when-idle 't)
   (setq markdown-command "pandoc -s")
 
   ;;; PYTHON ;;;
@@ -831,41 +946,46 @@ before packages are loaded."
   ;; ; automatic virtualenv loading; slow if you do it per buffer:
   (setq-default pyvenv-tracking-mode nil)
 
-  ; dash set for Python 3
+                                        ; dash set for Python 3
   (setq-default helm-dash-docsets-path (expand-file-name "~/docsets"))
-  (setq-default dash-docs-docsets-path (expand-file-name "~/docsets"))
+
   (defun python-mode-settings ()
     (interactive)
     (setq-local helm-dash-docsets '("Python 3"))
     (setq lsp-file-watch-ignored nil)
     )
-  ;(require 'lsp-pyright)
+
+                                        ;(require 'lsp-pyright)
+                                        ;(setq lsp-pyright-langserver-command "basedpyright")
+                                        ;(require 'lsp-pyrefly)
+                                        ;(add-hook 'python-mode-hook #'lsp-deferred)
+                                        ;(add-hook 'python-ts-mode-hook #'lsp-deferred)
   (add-hook 'python-mode-hook 'python-mode-settings)
   (add-hook 'python-mode-hook 'python-docstring-mode)
   (remove-hook 'python-mode-hook #'pyvenv-tracking-mode)
 
-  ; imenu-list
+                                        ; imenu-list
   (setq imenu-list-position 'left)
   (setq org-src-fontify-natively t)
   (setq org-todo-keywords
         '((sequence "TODO" "IN-PROGRESS" "|" "DONE")))
 
-  ; pasting in terminals
+                                        ; pasting in terminals
   (eval-after-load "term"
     '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
-  ; make C-y passthrough in vterm; can still use C-c C-y to get from emacs
+                                        ; make C-y passthrough in vterm; can still use C-c C-y to get from emacs
   (eval-after-load "vterm"
     '(define-key vterm-mode-map (kbd "C-y") 'vterm--self-insert))
-  ; paste from normal emacs copy/paste
+                                        ; paste from normal emacs copy/paste
   (eval-after-load "vterm"
-    '(define-key vterm-mode-map (kbd "C-c C-y") 'vterm-yank-primary))
-  ; C-z in terminal
+    '(define-key vterm-mode-map (kbd "C-c C-y") 'vterm-yank))
+                                        ; C-z in terminal
   (eval-after-load "vterm"
     '(define-key vterm-mode-map (kbd "C-c C-z") 'vterm-send-C-z))
-  ; C-c in terminal
+                                        ; C-c in terminal
   (eval-after-load "vterm"
     '(define-key vterm-mode-map (kbd "C-c C-c") 'vterm-send-C-c))
-  ; org-brain
+                                        ; org-brain
   (setq org-brain-path "~/Devel/slipbox/archive")
   (defun show-org-brain-visualize-keys ()
     (interactive)
@@ -875,11 +995,25 @@ before packages are loaded."
   (direnv-mode)
 
   (require 'quarto-mode)
+
+                                        ; LSP with random markdown is too brittle, and sometimes triggers https://github.com/polymode/polymode/issues/316
+  (setq-default polymode-lsp-integration nil)
+
+  (with-eval-after-load 'magit
+    (require 'forge))
+
   (require 'lsp-mode)
+  (require 'lsp-ltex-plus)
+  (lsp-ltex-plus-enable-for-modes)
   (lsp-register-client (make-lsp-client
-                         :new-connection (lsp-stdio-connection '("vale.vale-ls"))
-                         :activation-fn (lsp-activate-on "markdown")
-                         :server-id 'vale))
+                        :new-connection (lsp-stdio-connection '("ltex-ls-plus"))
+                        :activation-fn (lsp-activate-on "markdown")
+                        :server-id 'ltex-ls-plus))
+
+  ;; (lsp-register-client (make-lsp-client
+  ;;                       :new-connection (lsp-stdio-connection '("harper-ls" "--stdio"))
+  ;;                       :activation-fn (lsp-activate-on "markdown")
+  ;;                       :server-id 'harper))
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -889,18 +1023,100 @@ before packages are loaded."
 This is an auto-generated function, do not modify its content directly, use
 Emacs customize menu instead.
 This function is called at the very end of Spacemacs initialization."
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   (quote
-    (ascii-art-to-unicode zetteldeft deft seeing-is-believing rvm ruby-tools ruby-test-mode ruby-refactor ruby-hash-syntax rubocopfmt rubocop rspec-mode robe rbenv rake minitest helm-gtags ggtags enh-ruby-mode counsel-gtags counsel swiper ivy chruby bundler inf-ruby lsp-ui lsp-python-ms helm-lsp dap-mode lsp-treemacs bui cquery company-lsp ccls lsp-mode yasnippet-snippets yapfify yaml-mode xterm-color web-mode web-beautify vterm visual-regexp-steroids visual-regexp unfill treemacs-magit traad virtualenvwrapper toml-mode terminal-here tagedit switch-window sudo-ext smeargle slim-mode shell-pop scss-mode sass-mode remark-mode racer python-pytest python-docstring pytest pyenv-mode py-isort pug-mode prettier-js pippel pipenv pyvenv pip-requirements pandoc-mode outline-magic origami orgit org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download org-cliplink org-brain org-ql peg ov org-super-agenda ts nodejs-repl mwim multi-term mmm-mode markdown-toc magit-svn magit-gitflow magit-popup livid-mode skewer-mode live-py-mode json-navigator hierarchy js2-refactor multiple-cursors js2-mode js-doc insert-shebang importmagic epc ctable concurrent impatient-mode simple-httpd htmlize helm-rtags helm-pydoc helm-org-rifle helm-org helm-gitignore helm-git-grep helm-dash dash-docs helm-css-scss helm-company helm-c-yasnippet haml-mode graphviz-dot-mode google-c-style godoctor go-tag go-rename go-impl go-guru go-gen-test go-fill-struct go-eldoc gnuplot gitignore-templates gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flyspell-correct-helm flyspell-correct flycheck-ycmd flycheck-vale flycheck-rust flycheck-rtags flycheck-pos-tip pos-tip flycheck-bashate fish-mode evil-org evil-magit magit git-commit with-editor eshell-z eshell-prompt-extras esh-help emmet-mode edit-indirect dockerfile-mode docker transient tablist json-mode docker-tramp json-snatcher json-reformat discover-my-major makey disaster diff-hl dictionary link connection cython-mode cpp-auto-include company-ycmd ycmd request-deferred deferred company-web web-completion-data company-tern dash-functional tern company-statistics company-shell company-rtags rtags company-go go-mode company-c-headers company-anaconda company clang-format cargo markdown-mode rust-mode browse-at-remote blacken beginend auto-yasnippet yasnippet auto-dictionary anaconda-mode pythonic ac-ispell auto-complete ws-butler writeroom-mode visual-fill-column winum volatile-highlights vi-tilde-fringe uuidgen treemacs-projectile treemacs ht pfuture toc-org symon symbol-overlay string-inflection spaceline-all-the-icons spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode password-generator paradox spinner overseer org-bullets open-junk-file nameless move-text macrostep lorem-ipsum link-hint indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-xref helm-themes helm-swoop helm-purpose window-purpose imenu-list helm-projectile projectile helm-mode-manager helm-make helm-ls-git helm-flx helm-descbinds helm-ag google-translate golden-ratio flycheck-package package-lint flycheck pkg-info epl let-alist flycheck-elsa flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state iedit evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens smartparens paredit evil-args evil-anzu anzu eval-sexp-fu elisp-slime-nav editorconfig dumb-jump doom-modeline shrink-path all-the-icons memoize f dash s devdocs define-word column-enforce-mode clean-aindent-mode centered-cursor-mode auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup which-key use-package pcre2el org-plus-contrib hydra lv hybrid-mode font-lock+ evil goto-chg undo-tree dotenv-mode diminish bind-map bind-key async))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(highlight-parentheses-highlight ((nil (:weight ultra-bold))) t))
-)
+  (custom-set-variables
+   ;; custom-set-variables was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(ignored-local-variable-values '((rustic-indent-offset . 4)))
+   '(lsp-auto-guess-root t)
+   '(package-selected-packages
+     '(ace-jump-helm-line ace-link adoc-mode aggressive-indent all-the-icons
+                          auto-compile auto-highlight-symbol auto-yasnippet
+                          beginend blacken bmx-mode browse-at-remote bundler
+                          centered-cursor-mode clean-aindent-mode code-review
+                          column-enforce-mode company-c-headers
+                          company-nixos-options company-shell company-web
+                          cpp-auto-include csv-mode cython-mode dap-mode
+                          define-word deft devdocs diff-hl diminish
+                          dired-quick-sort direnv disable-mouse disaster
+                          discover-my-major docker dockerfile-mode dotenv-mode
+                          drag-stuff dumb-jump eat ein elisp-def elisp-demos
+                          elisp-slime-nav emmet-mode emr esh-help
+                          eshell-prompt-extras eshell-z eval-sexp-fu evil-anzu
+                          evil-args evil-cleverparens evil-escape
+                          evil-evilified-state evil-exchange evil-goggles
+                          evil-iedit-state evil-indent-plus evil-lion
+                          evil-lisp-state evil-matchit evil-mc evil-nerd-commenter
+                          evil-numbers evil-org evil-surround evil-textobj-line
+                          evil-tutor evil-unimpaired evil-visual-mark-mode
+                          evil-visualstar expand-region eyebrowse fancy-battery
+                          fish-mode flycheck-bashate flycheck-elsa
+                          flycheck-package flyspell-correct-helm gendoxy gh-md
+                          git-link git-messenger git-modes git-timemachine
+                          gitignore-templates gnuplot go-eldoc go-fill-struct
+                          go-gen-test go-guru go-impl go-rename go-tag godoctor
+                          golden-ratio google-c-style google-translate
+                          graphviz-dot-mode helm-ag helm-c-yasnippet helm-comint
+                          helm-company helm-css-scss helm-dash helm-descbinds
+                          helm-git-grep helm-ls-git helm-lsp helm-make
+                          helm-mode-manager helm-nixos-options helm-org
+                          helm-org-rifle helm-projectile helm-purpose helm-pydoc
+                          helm-swoop helm-themes helm-xref hide-comnt
+                          highlight-indentation highlight-numbers
+                          highlight-parentheses hl-todo holy-mode hungry-delete
+                          hybrid-mode impatient-mode indent-guide info+
+                          insert-shebang inspector js-doc js2-refactor json-mode
+                          json-navigator json-reformat just-mode langtool
+                          link-hint live-py-mode livid-mode lorem-ipsum
+                          lsp-ltex-plus lsp-origami lsp-pyrefly lsp-pyright lsp-ui
+                          lua-mode macrostep markdown-toc minitest multi-line
+                          multi-term multi-vterm mwim nameless nginx-mode nix-mode
+                          nix-update nodejs-repl npm-mode open-junk-file
+                          org-cliplink org-contrib org-download org-mime
+                          org-pomodoro org-present org-projectile org-rich-yank
+                          org-superstar orgit-forge outline-magic overseer
+                          page-break-lines pandoc-mode paradox password-generator
+                          pip-requirements pipenv pippel poetry polymode popwin
+                          powershell prettier-js pug-mode py-isort pydoc
+                          pyenv-mode pylookup pytest python-docstring
+                          python-pytest quarto-mode quickrun rainbow-delimiters
+                          rake remark-mode restart-emacs ron-mode rspec-mode
+                          rubocop rubocopfmt ruby-hash-syntax ruby-refactor
+                          ruby-test-mode ruby-tools ruff-format rustic sass-mode
+                          scss-mode separedit shell-pop shfmt slim-mode smeargle
+                          space-doc spaceline spacemacs-purpose-popwin
+                          spacemacs-whitespace-cleanup sphinx-doc sql-indent
+                          string-edit-at-point string-inflection switch-window
+                          symbol-overlay symon tagedit term-cursor terminal-here
+                          toc-org toml-mode traad treemacs-icons-dired
+                          treemacs-magit treemacs-persp treemacs-projectile
+                          undo-fu undo-fu-session unfill vi-tilde-fringe
+                          volatile-highlights vundo web-beautify web-mode wgrep
+                          winum writeroom-mode ws-butler yaml-mode
+                          yasnippet-snippets zeal-at-point))
+   '(safe-local-variable-values
+     '((projectile-root-local
+        . "/home/itamarst/devel/low-level-performance-book/articles/algebraic_floats")
+       (web-mode-indent-style . 2) (web-mode-block-padding . 2)
+       (web-mode-script-padding . 2) (web-mode-style-padding . 2)
+       (lsp-rust-analyzer-linked-projects
+        . ["./_quarto_posts/frequency_rs/Cargo.toml"])
+       (eval setq lsp-rust-analyzer-linked-projects
+             ["./_quarto_posts/frequency_rs/Cargo.toml"])
+       (eval setq lsp-rust-analyzer-linked-projects ["./frequency_rs/Cargo.toml"])
+       (rust-lsp-all-features . t)
+       (eval setq lsp-rust-analyzer-linked-projects
+             ["./book/part_2_compilation/frequent_rs/Cargo.toml"])
+       (eval setq ispell-personal-dictionary
+             (concat (locate-dominating-file default-directory ".dir-locals.el")
+                     "book/.aspell.en.pws"))
+       (javascript-backend . tide) (javascript-backend . tern)
+       (javascript-backend . lsp))))
+  (custom-set-faces
+   ;; custom-set-faces was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   )
+  )
